@@ -3,7 +3,8 @@ import json
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 from aiogram.utils import deep_linking
-from bot import bot
+
+from .bot import bot
 
 
 def question_keyboard(question, teacher_type, answers=(None, None)):
