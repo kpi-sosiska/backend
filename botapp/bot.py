@@ -17,7 +17,7 @@ bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot, storage=storage)
 
 dp.bind_filter(DeepLinkFilter)
-
+asyncio.create_task(bot.me)
 
 # register handlers
 from . import poll, other_cmds

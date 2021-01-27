@@ -5,11 +5,11 @@ from django.conf.urls.static import static
 
 import botapp.bot
 import parserapp.views
+from garni_studenti.settings import BASE_URL
 
-base = 'garni_studenti/'
 
 urlpatterns = [
-    path(base + 'admin/', admin.site.urls),
-    path(base + 'parse/', parserapp.views.parse),
-    path(base + 'bot/', botapp.bot.webhook_update),
-] + static(base + settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path(BASE_URL + 'admin/', admin.site.urls),
+    path(BASE_URL + 'parse/', parserapp.views.parse),
+    path(BASE_URL + 'bot/', botapp.bot.webhook_update),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -7,6 +7,7 @@ SECRET_KEY = 'x-ovvleysc=*$@yyj=@+wx@_)h%@dqgl8wjo#pbjr7&$(2c%82'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+BASE_URL = 'garni_studenti/'
 
 
 INSTALLED_APPS = [
@@ -64,7 +65,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_URL = '/static/'
+STATIC_URL = BASE_URL + 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = [
 
