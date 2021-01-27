@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2f7ec06b-2bd2-4451-9fe1-7e5e18a5cab0" name="Default Changelist" comment="import fix, add .idea">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="2f7ec06b-2bd2-4451-9fe1-7e5e18a5cab0" name="Default Changelist" comment="group links">
       <change beforePath="$PROJECT_DIR$/botapp/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/botapp/bot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/botapp/other_cmds.py" beforeDir="false" afterPath="$PROJECT_DIR$/botapp/other_cmds.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/botapp/poll.py" beforeDir="false" afterPath="$PROJECT_DIR$/botapp/poll.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/botapp/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/botapp/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mainapp/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/mainapp/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mainapp/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mainapp/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/garni_studenti/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/garni_studenti/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -288,7 +281,7 @@
       <workItem from="1611613473175" duration="8092000" />
       <workItem from="1611623259685" duration="43699000" />
       <workItem from="1611722539216" duration="191000" />
-      <workItem from="1611723437452" duration="7880000" />
+      <workItem from="1611723437452" duration="8452000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1611723484540</created>
@@ -318,7 +311,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611724398992</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="group links">
+      <created>1611780424254</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1611780424254</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -340,7 +340,8 @@
     <MESSAGE value="init" />
     <MESSAGE value="only parser" />
     <MESSAGE value="import fix, add .idea" />
-    <option name="LAST_COMMIT_MESSAGE" value="import fix, add .idea" />
+    <MESSAGE value="group links" />
+    <option name="LAST_COMMIT_MESSAGE" value="group links" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/garni_studenti_bot$startbot.coverage" NAME="startbot Coverage Results" MODIFIED="1611721770318" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
