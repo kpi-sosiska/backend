@@ -74,7 +74,7 @@ class TeacherNGroup(models.Model):
         return f"{self.teacher} в {self.group}"
 
     def link(self):
-        from botapp.bot import encode_deep_link
+        from botapp.utils import encode_deep_link
         return encode_deep_link(self.teacher_id, self.teacher_id)
 
     class Meta:
