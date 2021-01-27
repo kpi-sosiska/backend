@@ -1,4 +1,2 @@
-from .bot import dp
-
-def register():
-    from . import poll, other_cmds
+import os
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
