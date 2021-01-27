@@ -18,7 +18,7 @@ async def start_group(message: types.Message, payload: Tuple[str]):
         return await message.answer('Нет такой группы')
 
     teachers = [
-        hlink('• ' + t.name, encode_start_teacher(t.id, group.id))
+        '• ' + hlink(t.name, encode_start_teacher(t.id, group.id))
         for t in group.teachers.all()
     ]
     text = L['group_teachers_text'].format(
