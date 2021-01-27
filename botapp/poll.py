@@ -1,16 +1,16 @@
 import asyncio
 import json
 from contextlib import suppress
+from typing import Tuple
 
 from aiogram import types, exceptions
-from aiogram.utils.markdown import hbold, hitalic, hide_link
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.utils.markdown import hbold, hitalic, hide_link
 
-from botapp.utils import decode_deep_link, question_keyboard
+from botapp.utils import question_keyboard
 from mainapp import models
 from mainapp.models import Locale as L
-
 from .bot import dp
 
 
@@ -32,10 +32,10 @@ data:
 """
 
 
-@dp.message_handler(commands=['start'], state='*')
-async def start(message: types.Message, state: FSMContext):
+@dp.message_handler(commands=['start'], state='*', deep_link='t')
+async def start_teacher(message: types.Message, state: FSMContext, payload: Tuple[str]):
+    teacher_id, group_id = int(payload[0]), int(payload[1])
     try:
-        teacher_id, group_id = decode_deep_link(message.get_args())
         teacher_n_group = models.TeacherNGroup.objects.get(teacher_id=teacher_id, group_id=group_id)
     except (ValueError, models.TeacherNGroup.DoesNotExist):
         return await message.answer(L['wrong teacher'])

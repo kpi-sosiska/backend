@@ -58,6 +58,10 @@ class Group(models.Model):
     def get_groups(cls):
         return cls.objects.values_list('id')
 
+    def link(self):
+        from botapp.utils import encode_start_group
+        return encode_start_group(self.id)
+
     def __str__(self):
         return self.name
 
@@ -74,8 +78,8 @@ class TeacherNGroup(models.Model):
         return f"{self.teacher} в {self.group}"
 
     def link(self):
-        from botapp.utils import encode_deep_link
-        return encode_deep_link(self.teacher_id, self.teacher_id)
+        from botapp.utils import encode_start_teacher
+        return encode_start_teacher(self.teacher_id, self.group_id)
 
     class Meta:
         unique_together = ('teacher', 'group')

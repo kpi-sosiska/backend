@@ -1,10 +1,8 @@
 import json
 
 from aiogram import types
-from aiogram.utils.markdown import hlink
-
-from mainapp.models import Locale as L
-from mainapp import models
+from aiogram.dispatcher.filters import BoundFilter
+from aiogram.utils import deep_linking
 
 
 def question_keyboard(question, teacher_type, answers=(None, None)):
@@ -29,23 +27,38 @@ def question_keyboard(question, teacher_type, answers=(None, None)):
     ])
 
 
-def make_group_teachers_text(group_name):
-    group = models.Group.objects.get(name__icontains=group_name)
-    teachers = [
-        hlink('• ' + t.name, encode_deep_link(t.id, group.id))
-        for t in group.teachers.all()
-    ]
-    return L['group_teachers_text'].format(
-        group_name=group.name.upper(), results_link=group.faculty.poll_result_link, teachers='\n'.join(teachers)
-    )
+def encode_start_teacher(teacher_id, group_id):
+    return _encode_deep_link('t', teacher_id, group_id)
 
 
-def encode_deep_link(teacher_id, group_id):
+def encode_start_group(group_id):
+    return _encode_deep_link('g', group_id)
+
+
+def _encode_deep_link(*args):
+    payload = '-'.join(map(str, args))
+    payload = deep_linking.encode_payload(payload)
     botname = 'svin_test_bot'
-    return f"t.me/{botname}?start={teacher_id}-{group_id}"
+    return f"t.me/{botname}?start={payload}"
 
 
-def decode_deep_link(args):
-    # decode
-    teacher, faculty = args.split('-')
-    return int(teacher), int(faculty)
+def decode_deep_link(payload):
+    try:
+        payload = deep_linking.decode_payload(payload)
+    except Exception:
+        return None, None
+    args = payload.split('-')
+    return args
+
+
+class DeepLinkFilter(BoundFilter):
+    key = 'deep_link'
+
+    def __init__(self, deep_link):
+        self.deep_link = deep_link
+
+    async def check(self, message: types.Message):
+        payload = message.get_args()
+        cmd, *payload = decode_deep_link(payload)
+        if cmd == self.deep_link:
+            return {'payload': payload}

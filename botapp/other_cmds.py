@@ -1,18 +1,32 @@
+from typing import Tuple
+
 from aiogram import types
+from aiogram.utils.markdown import hlink
 
+from botapp.utils import encode_start_teacher
 from mainapp import models
+from mainapp.models import Locale as L
 from .bot import dp
-from botapp.utils import make_group_teachers_text
 
 
-@dp.message_handler(commands=['group'])
-async def make_group_teachers_text_handler(message: types.Message):
-    group_name = message.get_args()
+@dp.message_handler(commands=['start'], state='*', deep_link='g')
+async def start_group(message: types.Message, payload: Tuple[str]):
+    group_id = int(payload[0])
     try:
-        text = make_group_teachers_text(group_name)
+        group = models.Group.objects.get(id=group_id)
     except models.Group.DoesNotExist:
-        await message.answer('Нет такой группы')
-    except models.Group.MultipleObjectsReturned:
-        await message.answer('Под этот запрос подходит несколько групп')
-    else:
-        await message.reply(text)
+        return await message.answer('Нет такой группы')
+
+    teachers = [
+        hlink('• ' + t.name, encode_start_teacher(t.id, group.id))
+        for t in group.teachers.all()
+    ]
+    text = L['group_teachers_text'].format(
+        group_name=group.name.upper(), results_link=group.faculty.poll_result_link, teachers='\n'.join(teachers)
+    )
+    await message.reply(text)
+
+
+@dp.message_handler(commands=['start'], state='*')
+async def start_fallback(message: types.Message):
+    await message.answer(L['no_start_cmd'])
