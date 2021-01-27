@@ -4,8 +4,6 @@ from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 from aiogram.utils import deep_linking
 
-from .bot import bot
-
 
 def question_keyboard(question, teacher_type, answers=(None, None)):
     def _make_btn(answer_text, row_n, answer_n):
@@ -38,6 +36,7 @@ def encode_start_group(group_id):
 
 
 def _encode_deep_link(*args):
+    from .bot import bot
     payload = '-'.join(map(str, args))
     payload = deep_linking.encode_payload(payload)
     return f"t.me/{bot._me.username}?start={payload}"
