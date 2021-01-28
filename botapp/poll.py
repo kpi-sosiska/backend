@@ -78,9 +78,13 @@ async def teacher_type_start(message: types.Message):
 
 @dp.callback_query_handler(state=PollStates.teacher_type)
 async def teacher_type_query_handler(query: types.CallbackQuery, state: FSMContext):
+    type_ = query.data
+    if type_ not in list(models.TEACHER_TYPE.keys())[:-1]:
+        return await query.answer("?")
+
     await query.answer()
-    await state.update_data(teacher_type=query.data)
-    await query.message.delete()
+    await state.update_data(teacher_type=type_)
+    await query.message.edit_text(L['teacher_type_chosen'].format(type=L[f'teacher_type_{type_}']))
     await questions_start(query.message, state)
 
 

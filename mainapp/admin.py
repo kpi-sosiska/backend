@@ -82,6 +82,7 @@ class ResultAdmin(admin.ModelAdmin):
         return obj.teacher_n_group.group
 
     list_display = ('user_id', 'teacher', 'group', 'teacher_type')
+    readonly_fields = ('date',)
     raw_id_fields = ('teacher_n_group', )
     inlines = [
         AnswerInline,

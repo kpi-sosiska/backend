@@ -125,9 +125,9 @@ class Result(models.Model):
     teacher_type = models.CharField('Тип опросника', max_length=20,
                                     choices=TEACHER_TYPE.items(), default=list(TEACHER_TYPE)[0])
 
-    open_question_answer = models.TextField('Ответ свободного микрофона')
+    open_question_answer = models.TextField('Ответ свободного микрофона', null=True, blank=True)
 
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField('Дата прохождения', auto_now_add=True)
 
     @classmethod
     def add(cls, user_id, teacher_n_group, teacher_type, open_question_answer, other_answers):
