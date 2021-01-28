@@ -1,9 +1,8 @@
 from typing import Tuple
 
 from aiogram import types
-from aiogram.utils.markdown import hlink
 
-from botapp.utils import encode_start_teacher
+from botapp.utils import teachers_links
 from mainapp import models
 from mainapp.models import Locale as L
 from .bot import dp
@@ -17,13 +16,9 @@ async def start_group(message: types.Message, payload: Tuple[str]):
     except models.Group.DoesNotExist:
         return await message.answer('Нет такой группы')
 
-    teachers = [
-        '• ' + hlink(t.name, encode_start_teacher(t.id, group.id))
-        for t in group.teachers.all()
-    ]
-    text = L['group_teachers_text'].format(
-        group_name=group.name.upper(), results_link=group.faculty.poll_result_link, teachers='\n'.join(teachers)
-    )
+    teachers = teachers_links(group.teachers.all(), group.id)
+    text = L['group_teachers_text'].format(group_name=group.name.upper(),
+                                           results_link=group.faculty.poll_result_link, teachers=teachers)
     await message.reply(text)
 
 

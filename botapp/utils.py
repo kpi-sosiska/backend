@@ -3,6 +3,7 @@ import json
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 from aiogram.utils import deep_linking
+from aiogram.utils.markdown import hlink
 
 
 def question_keyboard(question, teacher_type, answers=(None, None)):
@@ -25,6 +26,14 @@ def question_keyboard(question, teacher_type, answers=(None, None)):
         for row_n, answers_row in enumerate(buttons)
         for answer_n, answer_text in answers_row
     ])
+
+
+def teachers_links(teachers, group_id):
+    return '\n'.join([
+        '• ' + hlink(t.name, encode_start_teacher(t.id, group_id))
+        for t in teachers
+    ])
+
 
 
 def encode_start_teacher(teacher_id, group_id):

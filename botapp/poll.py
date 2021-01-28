@@ -8,7 +8,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.markdown import hbold, hitalic, hide_link
 
-from botapp.utils import question_keyboard
+from botapp.utils import question_keyboard, teachers_links
 from mainapp import models
 from mainapp.models import Locale as L
 from .bot import dp
@@ -129,6 +129,8 @@ async def open_question_query_handler(message: types.Message, state: FSMContext)
         if message.text == '/skip':
             await state.update_data(open_q=None)
         await save_to_db(message, state)
+        await other_teachers_in_group(message, state)
+        await state.finish()
     else:
         await state.update_data(open_q=message.text)
         await message.answer(L['confirm_open_question_text'])
@@ -137,15 +139,28 @@ async def open_question_query_handler(message: types.Message, state: FSMContext)
 async def save_to_db(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         try:
-            models.Result.add(
-                message.from_user.id, data['teacher_n_group'], data['teacher_type'], data['open_q'], data['q2a'])
+            models.Result.add(message.from_user.id, data['teacher_n_group'],
+                              data['teacher_type'], data['open_q'], data['q2a'])
         except Exception:
             await message.answer(L['result_save_error'], reply_markup=types.ReplyKeyboardRemove())
             raise
         else:
             await message.answer(L['result_save_success'], reply_markup=types.ReplyKeyboardRemove())
-    await state.finish()
 
+
+#
+
+
+async def other_teachers_in_group(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        group = data['teacher_n_group'].group
+
+    teachers = group.teachers.exclude(teacherngroup__result__user_id=message.from_user.id)
+    if not teachers:
+        return
+    teachers = teachers_links(teachers, group.id)
+    text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(), teachers=teachers)
+    await message.answer(text)
 
 #
 
