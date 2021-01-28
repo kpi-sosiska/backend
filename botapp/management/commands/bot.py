@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from botapp.bot import dp, set_webhook
 
-        if 'webhook' in options:
+        if options['webhook']:
             set_webhook(options['webhook'])
         else:
             executor.start_polling(dp)

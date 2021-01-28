@@ -19,6 +19,8 @@ class PollStates(StatesGroup):
     questions = State()
     open_question = State()
 
+    two_group_one_user = State()
+
 
 """
 data:
@@ -33,19 +35,30 @@ data:
 
 
 @dp.message_handler(commands=['start'], state='*', deep_link='t')
-async def start_teacher(message: types.Message, state: FSMContext, payload: Tuple[str]):
+async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[str, str]):
     teacher_id, group_id = int(payload[0]), int(payload[1])
     try:
         teacher_n_group = models.TeacherNGroup.objects.get(teacher_id=teacher_id, group_id=group_id)
     except (ValueError, models.TeacherNGroup.DoesNotExist):
         return await message.answer(L['wrong teacher'])
 
+    await state.set_data(dict(teacher_n_group=teacher_n_group))
+
+    results_from_other_group = models.Result.objects.filter(user_id=message.from_user.id)\
+                                                    .exclude(teacher_n_group__group=teacher_n_group.group)
+    if results_from_other_group:
+        return await two_group_one_user_start(message, state, results_from_other_group)
+
     if models.Result.objects.filter(user_id=message.from_user.id, teacher_n_group=teacher_n_group).count():
         await message.answer(L['same_teacher_again'])
 
-    await state.update_data(teacher_n_group=teacher_n_group)
+    await start_teacher(message, state)
 
-    teacher = teacher_n_group.teacher
+
+async def start_teacher(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        teacher = data['teacher_n_group'].teacher
+
     await message.answer(hide_link(teacher.photo) + L['teacher_text'].format(teacher=teacher))
     if teacher.is_eng:
         await state.update_data(teacher_type='ENG')
@@ -129,3 +142,35 @@ async def save_to_db(message: types.Message, state: FSMContext):
         else:
             await message.answer(L['result_save_success'])
     await state.finish()
+
+
+#
+
+
+KEYBOARD_2G1U = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(L['btn_reset_2g1u'], callback_data='reset'))
+
+
+async def two_group_one_user_start(message: types.Message, state: FSMContext, results_from_other_group):
+    other_group = results_from_other_group[0].teacher_n_group.group.name.upper()
+    async with state.proxy() as data:
+        cur_group = data['teacher_n_group'].group.name.upper()
+
+    await message.answer(
+        L['two_group_one_user'].format(other_group=other_group, cur_group=cur_group),
+        reply_markup=KEYBOARD_2G1U
+    )
+    await PollStates.two_group_one_user.set()
+
+
+@dp.callback_query_handler(state=PollStates.two_group_one_user)
+async def two_group_one_user_handler(query: types.CallbackQuery, state: FSMContext):
+    await query.answer()
+    if query.data != 'reset':
+        return
+
+    async with state.proxy() as data:
+        teacher_n_group = data['teacher_n_group']
+    models.Result.objects.filter(user_id=query.from_user.id) \
+                         .exclude(teacher_n_group__group=teacher_n_group.group).delete()
+    await query.message.edit_reply_markup()
+    await start_teacher(query.message, state)

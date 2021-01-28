@@ -11,16 +11,20 @@ from django.http import HttpResponse
 from botapp.utils import DeepLinkFilter
 
 TOKEN = getenv('bot_token')
-
 storage = MemoryStorage()
-bot = Bot(TOKEN, parse_mode='HTML')
-dp = Dispatcher(bot, storage=storage)
 
-dp.bind_filter(DeepLinkFilter)
-asyncio.create_task(bot.me)
+try:
+    bot = Bot(TOKEN, parse_mode='HTML')
+    dp = Dispatcher(bot, storage=storage)
+except Exception as ex:
+    print(ex)
+else:
+    dp.bind_filter(DeepLinkFilter)
+    if asyncio.get_event_loop().is_running():
+        asyncio.create_task(bot.me)
 
-# register handlers
-from . import poll, other_cmds
+    # register handlers
+    from . import poll, other_cmds
 
 
 def set_webhook(url):
