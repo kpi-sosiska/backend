@@ -125,10 +125,9 @@ async def open_question_start(message: types.Message):
 
 @dp.message_handler(state=PollStates.open_question)
 async def open_question_query_handler(message: types.Message, state: FSMContext):
-    if message.text == '/skip':
-        await state.update_data(open_q=None)
-        await save_to_db(message, state)
-    elif message.text == '/confirm':
+    if message.text in ('/skip', '/confirm'):
+        if message.text == '/skip':
+            await state.update_data(open_q=None)
         await save_to_db(message, state)
     else:
         await state.update_data(open_q=message.text)
@@ -141,10 +140,10 @@ async def save_to_db(message: types.Message, state: FSMContext):
             models.Result.add(
                 message.from_user.id, data['teacher_n_group'], data['teacher_type'], data['open_q'], data['q2a'])
         except Exception:
-            await message.answer(L['result_save_error'])
+            await message.answer(L['result_save_error'], reply_markup=types.ReplyKeyboardRemove())
             raise
         else:
-            await message.answer(L['result_save_success'])
+            await message.answer(L['result_save_success'], reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
