@@ -24,7 +24,7 @@ async def start_group(message: types.Message, payload: Tuple[str]):
 
 @dp.message_handler(commands=['start'], state='*')
 async def start_fallback(message: types.Message):
-    await message.answer(L['wrong_link'] if message.get_args() else L['no_start_cmd'])
+    await message.answer(L['wrong_link'] if message.get_args() else L['unknown_cmd'])
 
 
 @dp.message_handler(commands=['help'], state='*')
