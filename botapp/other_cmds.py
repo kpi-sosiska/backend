@@ -14,7 +14,7 @@ async def start_group(message: types.Message, payload: Tuple[str]):
     try:
         group = models.Group.objects.get(id=group_id)
     except models.Group.DoesNotExist:
-        return await message.answer(L['wrong link'])
+        return await message.answer(L['wrong_link'])
 
     teachers = teachers_links(group.teachers.all(), group.id)
     text = L['group_teachers_text'].format(group_name=group.name.upper(),
@@ -24,12 +24,12 @@ async def start_group(message: types.Message, payload: Tuple[str]):
 
 @dp.message_handler(commands=['start'], state='*')
 async def start_fallback(message: types.Message):
-    await message.answer(L['wrong link'] if message.get_args() else L['no_start_cmd'])
+    await message.answer(L['wrong_link'] if message.get_args() else L['no_start_cmd'])
 
 
 @dp.message_handler(commands=['help'], state='*')
 async def help_cmd(message: types.Message):
-    await message.answer(L['creds_text'])
+    await message.answer(L['help_text'])
 
 
 @dp.message_handler(state='*')
