@@ -28,5 +28,10 @@ async def start_fallback(message: types.Message):
 
 
 @dp.message_handler(commands=['help'], state='*')
-async def start_fallback(message: types.Message):
-    await message.answer(L['creds'])
+async def help_cmd(message: types.Message):
+    await message.answer(L['creds_text'])
+
+
+@dp.message_handler(state='*')
+async def text_fallback(message: types.Message):
+    await message.answer(L['unknown_cmd'])
