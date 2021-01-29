@@ -40,7 +40,7 @@ async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[s
     try:
         teacher_n_group = models.TeacherNGroup.objects.get(teacher_id=teacher_id, group_id=group_id)
     except (ValueError, models.TeacherNGroup.DoesNotExist):
-        return await message.answer(L['wrong teacher'])
+        return await message.answer(L['wrong link'])
 
     await state.set_data(dict(teacher_n_group=teacher_n_group))
 
