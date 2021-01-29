@@ -89,16 +89,24 @@ async def teacher_type_query_handler(query: types.CallbackQuery, state: FSMConte
 
 
 async def questions_start(message: types.Message, state: FSMContext):
+    async def _send_msg(question_):
+        for _ in range(5):
+            try:
+                await message.answer(hbold(question_.question_text) + '\n' * 2 + hitalic(question_.answer_tip),
+                                     reply_markup=question_keyboard(question_, teacher_type))
+                await asyncio.sleep(0.1)
+            except exceptions.RetryAfter as ex:
+                await asyncio.sleep(ex.timeout + 1)
+
     async with state.proxy() as data:
         teacher_type = data['teacher_type']
         data['q2a'] = {}
 
         questions = models.Question.get_by_type(teacher_type)
         for question in questions:
-            await message.answer(hbold(question.question_text) + '\n' * 2 + hitalic(question.answer_tip),
-                                 reply_markup=question_keyboard(question, teacher_type))
-            await asyncio.sleep(0.1)
+            await _send_msg(question)
             data['q2a'][question.id] = [None] * (2 if question.need_two_answers(teacher_type) else 1)
+
     await PollStates.questions.set()
 
 

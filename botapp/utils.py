@@ -35,7 +35,6 @@ def teachers_links(teachers, group_id):
     ])
 
 
-
 def encode_start_teacher(teacher_id, group_id):
     return _encode_deep_link('t', teacher_id, group_id)
 
