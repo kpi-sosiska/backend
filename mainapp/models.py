@@ -13,7 +13,6 @@ TEACHER_TYPE = {
 
 
 class Teacher(models.Model):
-    id = models.IntegerField('ID', primary_key=True)
     name = models.CharField('Имя', max_length=200)
     photo = models.CharField('Ссылка на фото', max_length=100, null=True, blank=True)
     is_eng = models.BooleanField('Это англ?', default=False)
@@ -43,7 +42,6 @@ class Faculty(models.Model):
 
 
 class Group(models.Model):
-    id = models.IntegerField('ID', primary_key=True)
     name = models.CharField('Код', max_length=20)
     faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
     teachers = models.ManyToManyField(Teacher, through='TeacherNGroup')
