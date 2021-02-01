@@ -35,3 +35,8 @@ async def help_cmd(message: types.Message):
 @dp.message_handler(state='*')
 async def text_fallback(message: types.Message):
     await message.answer(L['unknown_cmd'])
+
+
+@dp.callback_query_handler(state='*')
+async def query_fallback(query: types.CallbackQuery):
+    await query.answer(L['callback_no_state'])

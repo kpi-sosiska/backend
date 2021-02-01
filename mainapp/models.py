@@ -40,6 +40,10 @@ class Faculty(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Факультет"
+        verbose_name_plural = "Факультеты"
+
 
 class Group(models.Model):
     name = models.CharField('Код', max_length=20)

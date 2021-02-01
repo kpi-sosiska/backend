@@ -51,14 +51,19 @@ class TeacherAdmin(admin.ModelAdmin):
     list_display = ('name', 'faculties')
 
 
-
 @admin.register(TeacherNGroup)
 class TeacherNGroupAdmin(admin.ModelAdmin):
     def faculty(self, obj):
         return obj.group.faculty
 
     list_display = ('teacher', 'group', 'faculty', 'link')
-#
+
+
+@admin.register(Faculty)
+class FacultyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'poll_result_link')
+    list_editable = ('poll_result_link', )
+
 
 #
 
