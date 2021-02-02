@@ -39,4 +39,4 @@ async def text_fallback(message: types.Message):
 
 @dp.callback_query_handler(state='*')
 async def query_fallback(query: types.CallbackQuery):
-    await query.answer(L['callback_no_state'])
+    await query.answer(L['callback_no_state'], show_alert=True)
