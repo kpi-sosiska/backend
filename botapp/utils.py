@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 from aiogram.utils import deep_linking
 from aiogram.utils.markdown import hlink
+from mainapp.models import Locale as L
 
 
 def question_keyboard(question, teacher_type, answers=(None, None)):
@@ -16,8 +17,8 @@ def question_keyboard(question, teacher_type, answers=(None, None)):
 
     buttons = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'] if question.answer_options == 5 else ['Ні', 'Так']
     buttons = list(enumerate(buttons))
-    buttons = [[(None, 'Лектор'), *buttons],
-               [(None, 'Практик'), *buttons]] \
+    buttons = [[(None, L['2answrs_LECTOR']), *buttons],
+               [(None, L['2answrs_PRACTIC']), *buttons]] \
         if question.need_two_answers(teacher_type) else \
               [[*buttons]]
 
