@@ -95,6 +95,7 @@ async def questions_start(message: types.Message, state: FSMContext):
                 await message.answer(hbold(question_.question_text) + '\n' * 2 + hitalic(question_.answer_tip),
                                      reply_markup=question_keyboard(question_, teacher_type))
                 await asyncio.sleep(0.1)
+                return
             except exceptions.RetryAfter as ex:
                 await asyncio.sleep(ex.timeout + 1)
 
