@@ -14,6 +14,8 @@ TEACHER_TYPE = {
 
 class Teacher(models.Model):
     name = models.CharField('Имя', max_length=200)
+    name_position = models.CharField('Имя+Должность', max_length=200, null=True)
+    name_position_short = models.CharField('Имя+Должность сокращенно', max_length=200, null=True)
     photo = models.CharField('Ссылка на фото', max_length=100, null=True, blank=True)
     is_eng = models.BooleanField('Это англ?', default=False)
 
