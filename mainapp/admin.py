@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 
 from django.contrib import admin
@@ -86,7 +87,24 @@ class ResultAdmin(admin.ModelAdmin):
     def group(self, obj):
         return obj.teacher_n_group.group
 
+    def export(self, request, queryset):
+        text = json.dumps([
+            dict(
+                teacher_name=res.teacher_n_group.group.name,
+                teacher_type=res.teacher_type,
+                group_name=res.teacher_n_group.group.name,
+                open_question_answer=res.open_question_answer,
+                answers=res.resultanswers_set.values('question__question_text', 'answer_1', 'answer_2')
+            )
+            for res in queryset
+        ])
+        return HttpResponse(f"<pre>{text}</pre>")
+
     list_display = ('user_id', 'teacher', 'group', 'teacher_type')
+    list_filter = (
+        ('teacher_n_group__teacher', admin.RelatedOnlyFieldListFilter),
+        ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter)
+    )
     readonly_fields = ('date',)
     raw_id_fields = ('teacher_n_group', )
     inlines = [
