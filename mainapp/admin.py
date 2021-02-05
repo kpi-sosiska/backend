@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty
 
@@ -88,17 +88,17 @@ class ResultAdmin(admin.ModelAdmin):
         return obj.teacher_n_group.group
 
     def export(self, request, queryset):
-        text = json.dumps([
+        data = [
             dict(
                 teacher_name=res.teacher_n_group.teacher.name,
                 teacher_type=res.teacher_type,
                 group_name=res.teacher_n_group.group.name,
                 open_question_answer=res.open_question_answer,
-                answers=list(res.resultanswers_set.values('question__question_text', 'answer_1', 'answer_2'))
+                answers=res.resultanswers_set.values('question__question_text', 'answer_1', 'answer_2')
             )
             for res in queryset
-        ])
-        return HttpResponse(f"<pre>{text}</pre>")
+        ]
+        return JsonResponse(data)
 
     list_display = ('user_id', 'teacher', 'group', 'teacher_type')
     list_filter = (
