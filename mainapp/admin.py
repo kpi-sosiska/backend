@@ -94,7 +94,7 @@ class ResultAdmin(admin.ModelAdmin):
                 teacher_type=res.teacher_type,
                 group_name=res.teacher_n_group.group.name,
                 open_question_answer=res.open_question_answer,
-                answers=res.resultanswers_set.values('question__question_text', 'answer_1', 'answer_2')
+                answers=list(res.resultanswers_set.values('question__question_text', 'answer_1', 'answer_2'))
             )
             for res in queryset
         ])
