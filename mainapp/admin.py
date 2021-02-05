@@ -1,4 +1,3 @@
-import json
 from collections import defaultdict
 
 from django.contrib import admin
@@ -98,7 +97,7 @@ class ResultAdmin(admin.ModelAdmin):
             )
             for res in queryset
         ]
-        return JsonResponse(data)
+        return JsonResponse(data, safe=False)
 
     list_display = ('user_id', 'teacher', 'group', 'teacher_type')
     list_filter = (
