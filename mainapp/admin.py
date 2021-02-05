@@ -107,6 +107,7 @@ class ResultAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('date',)
     raw_id_fields = ('teacher_n_group', )
+    actions = ('export', )
     inlines = [
         AnswerInline,
     ]
