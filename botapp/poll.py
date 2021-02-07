@@ -7,6 +7,7 @@ from aiogram import types, exceptions
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.markdown import hbold, hitalic, hide_link
+from django.db.models.aggregates import Sum
 
 from botapp.utils import question_keyboard, teachers_links
 from mainapp import models
@@ -164,7 +165,8 @@ async def other_teachers_in_group(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         group = data['teacher_n_group'].group
 
-    teachers = group.teachers.exclude(teacherngroup__result__user_id=message.from_user.id)
+    teachers = group.teachers.exclude(teacherngroup__result__user_id=message.from_user.id) \
+                    .annotate(results_cnt=Sum('teacherngroup__result')).order_by('results_cnt')
     if not teachers:
         return
     teachers = teachers_links(teachers, group.id)
