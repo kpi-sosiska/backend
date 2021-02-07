@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from aiogram import types
+from django.db.models import Sum
 
 from botapp.utils import teachers_links
 from mainapp import models
@@ -16,7 +17,8 @@ async def start_group(message: types.Message, payload: Tuple[str]):
     except models.Group.DoesNotExist:
         return await message.answer(L['wrong_link'])
 
-    teachers = teachers_links(group.teachers.all(), group.id)
+    teachers = group.teachers.all().annotate(results_cnt=Sum('teacherngroup__result')).order_by('results_cnt')
+    teachers = teachers_links(teachers, group.id)
     text = L['group_teachers_text'].format(group_name=group.name.upper(),
                                            results_link=group.faculty.poll_result_link, teachers=teachers)
     await message.reply(text)
