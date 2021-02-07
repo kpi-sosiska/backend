@@ -89,7 +89,8 @@ class ResultAdmin(admin.ModelAdmin):
     def export(self, request, queryset):
         data = [
             dict(
-                teacher_name=res.teacher_n_group.teacher.name,
+                teacher_name=res.teacher_n_group.teacher.name_position +
+                             (' ENG' if res.teacher_n_group.teacher.is_eng else ''),
                 teacher_type=res.teacher_type,
                 group_name=res.teacher_n_group.group.name,
                 open_question_answer=res.open_question_answer,
