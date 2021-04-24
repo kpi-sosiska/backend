@@ -1,0 +1,2 @@
+aiogram==2.12.1
+Django==3.2

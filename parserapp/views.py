@@ -1,6 +1,6 @@
 import os
 
-from django_async_stream import AsyncStreamingHttpResponse
+# from django_async_stream import AsyncStreamingHttpResponse
 from .parser import parser
 
 
