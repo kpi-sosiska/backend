@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'x-ovvleysc=*$@yyj=@+wx@_)h%@dqgl8wjo#pbjr7&$(2c%82'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 BASE_URL = 'garni_studenti/'
