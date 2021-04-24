@@ -24,7 +24,7 @@
  
 ## botapp
   апка с тг ботом (аиограм)  
-  botapp/management/commands/bot.py позволяет запускать бота используя manage.py  
+  botapp/management/commands/bot.py позволяет (пока что нет) запускать бота используя manage.py  
   на момент написания бот умеет только проводить опрос.  
   todo постить результаты в каналы
   
