@@ -47,14 +47,30 @@ class Faculty(models.Model):
         verbose_name_plural = "Факультеты"
 
 
+class Cathedra(models.Model):
+    name = models.CharField('Кафедра', max_length=10, null=True)
+    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
+
+    def __str__(self):
+        return f'{self.name} ({self.faculty.name})'
+
+    class Meta:
+        verbose_name = "Кафедра"
+        verbose_name_plural = "Кафедри"
+
+
 class Group(models.Model):
     name = models.CharField('Код', max_length=20)
-    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
+    cathedra = models.ForeignKey(Cathedra, models.CASCADE, verbose_name='Кафедра', null=True)
     teachers = models.ManyToManyField(Teacher, through='TeacherNGroup')
 
+    @property
+    def faculty(self):
+        return self.cathedra.faculty
+
     @classmethod
-    def add(cls, id_, name, faculty):
-        group = cls(id=id_, name=name, faculty=faculty)
+    def add(cls, id_, name, cathedra):
+        group = cls(id=id_, name=name, cathedra=cathedra)
         group.save()
         return group
 
@@ -89,6 +105,7 @@ class TeacherNGroup(models.Model):
         unique_together = ('teacher', 'group')
         verbose_name = "Препод+Группа"
         verbose_name_plural = "Преподы+Группы"
+
 
 
 class Question(models.Model):

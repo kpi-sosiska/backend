@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.contrib import admin
 from django.http import HttpResponse, JsonResponse
 
-from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty
+from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, Cathedra
 
 
 @admin.register(Locale)
@@ -18,15 +18,15 @@ class LocaleAdmin(admin.ModelAdmin):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     def export(self, request, queryset):
-        fac2group = defaultdict(list)
+        cath2group = defaultdict(list)
         for group in queryset:
-            fac2group[group.faculty.name].append(group)
+            cath2group[group.cathedra.name].append(group)
         text = "\n".join([
             f"{fac: ^30}\n" + '\n'.join([
                 f"{group.name: <20} {group.link()}"
                 for group in groups
             ])
-            for fac, groups in fac2group.items()
+            for fac, groups in cath2group.items()
         ])
         return HttpResponse(f"<pre>{text}</pre>")
 
@@ -34,8 +34,8 @@ class GroupAdmin(admin.ModelAdmin):
         model = TeacherNGroup
         extra = 1
 
-    list_display = ('name', 'faculty', 'link')
-    list_filter = ('faculty', )
+    list_display = ('name', 'cathedra', 'link')
+    list_filter = ('cathedra', )
     search_fields = ('name', )
     actions = ('export', )
     inlines = [
@@ -65,7 +65,9 @@ class FacultyAdmin(admin.ModelAdmin):
     list_editable = ('poll_result_link', )
 
 
-#
+@admin.register(Cathedra)
+class CathedraAdmin(admin.ModelAdmin):
+    list_display = ('name', 'faculty')
 
 
 @admin.register(Question)
