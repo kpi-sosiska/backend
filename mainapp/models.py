@@ -140,11 +140,13 @@ class Result(models.Model):
                 user_id=user_id, teacher_n_group=teacher_n_group, defaults=dict(
                     teacher_type=teacher_type, open_question_answer=open_question_answer
                 ))
+
+            ResultAnswers.objects.filter(result=result).delete()  # удалить старые результаты (если это перепрохождение)
             for question_id, answers in other_answers.items():
                 if len(answers) == 1:
                     answers.append(None)
-                ResultAnswers.objects.update_or_create(result=result, question_id=question_id, defaults=dict(
-                                                       answer_1=answers[0], answer_2=answers[1]))
+                ResultAnswers.objects.create(result=result, question_id=question_id,
+                                             defaults=dict(answer_1=answers[0], answer_2=answers[1]))
 
     class Meta:
         unique_together = ('user_id', 'teacher_n_group')
