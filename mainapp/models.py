@@ -176,14 +176,14 @@ class Locale(models.Model):
     cache = dict()
 
     def __class_getitem__(cls, key) -> str:
-        try:
-            return cls.cache[key]
-        except KeyError:
+        if key not in cls.cache:
             obj, _ = cls.objects.get_or_create(key=key)
-            return obj.value or obj.key
+            cls.cache[key] = obj.value or obj.key
+        return cls.cache[key]
 
     def save(self, *args, **kwargs):
         self.cache[self.key] = self.value
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.key} -> {self.value or 'Не заполнено'}"
