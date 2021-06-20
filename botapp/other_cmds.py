@@ -11,7 +11,7 @@ from .bot import dp
 
 @dp.message_handler(commands=['start'], state='*', deep_link='g')
 async def start_group(message: types.Message, payload: Tuple[str]):
-    group_id = int(payload[0])
+    group_id = payload[0]
     try:
         group = models.Group.objects.get(id=group_id)
     except models.Group.DoesNotExist:
