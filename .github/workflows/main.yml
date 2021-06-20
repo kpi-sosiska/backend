@@ -17,10 +17,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run: docker build . --tag svinerus/sova-backend:$(date +%s)
+        run: docker build . --tag svinerus/sova-backend:latest
 
       - name: Docker log in
         run: docker login -u svinerus -p ${{secrets.DOCKER_PASSWORD}}
 
       - name: Push image
-        run: docker push svinerus/sova-backend
+        run: docker push svinerus/sova-backend:latest
