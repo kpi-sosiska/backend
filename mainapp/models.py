@@ -12,29 +12,6 @@ TEACHER_TYPE = {
 }
 
 
-class Teacher(models.Model):
-    name = models.CharField('Имя', max_length=200)
-    name_position = models.CharField('Имя+Должность', max_length=200, null=True, blank=True)
-    name_position_short = models.CharField('Имя+Должность сокращенно', max_length=200, null=True, blank=True)
-    photo = models.CharField('Ссылка на фото', max_length=100, null=True, blank=True)
-    is_eng = models.BooleanField('Это англ?', default=False)
-
-    groups = models.ManyToManyField('Group', through='TeacherNGroup')
-
-    @classmethod
-    def add(cls, id_, name, type_, group):
-        teacher = cls(id=id_, name=name, is_eng=type_ == 'ENG')
-        teacher.save()
-        group.teachers.add(teacher)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Препод"
-        verbose_name_plural = "Преподы"
-
-
 class Faculty(models.Model):
     name = models.CharField('Факультет', max_length=10, null=True)
     poll_result_link = models.CharField('Ссылка на результаты опроса', max_length=100, null=True)
@@ -59,7 +36,32 @@ class Cathedra(models.Model):
         verbose_name_plural = "Кафедри"
 
 
+class Teacher(models.Model):
+    id = models.CharField(max_length=36, primary_key=True)
+    name = models.CharField('Имя', max_length=200)
+    photo = models.CharField('Ссылка на фото', max_length=100, null=True, blank=True)
+    is_eng = models.BooleanField('Это англ?', default=False)
+
+    groups = models.ManyToManyField('Group', through='TeacherNGroup')
+    cathedras = models.ManyToManyField(Cathedra, related_name='teachers')
+    lessons = models.TextField("Шо ведет", null=True)
+
+    @classmethod
+    def add(cls, id_, name, type_, group):
+        teacher = cls(id=id_, name=name, is_eng=type_ == 'ENG')
+        teacher.save()
+        group.teachers.add(teacher)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Препод"
+        verbose_name_plural = "Преподы"
+
+
 class Group(models.Model):
+    id = models.CharField(max_length=36, primary_key=True)
     name = models.CharField('Код', max_length=20)
     cathedra = models.ForeignKey(Cathedra, models.CASCADE, verbose_name='Кафедра', null=True)
     teachers = models.ManyToManyField(Teacher, through='TeacherNGroup')
@@ -105,7 +107,6 @@ class TeacherNGroup(models.Model):
         unique_together = ('teacher', 'group')
         verbose_name = "Препод+Группа"
         verbose_name_plural = "Преподы+Группы"
-
 
 
 class Question(models.Model):

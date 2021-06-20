@@ -45,10 +45,9 @@ def encode_start_group(group_id):
 
 
 def _encode_deep_link(*args):
-    from .bot import bot
     payload = '-'.join(map(str, args))
     payload = deep_linking.encode_payload(payload)
-    return f"t.me/{bot._me.username}?start={payload}"
+    return f"t.me/{L['bot_username']}?start={payload}"
 
 
 def decode_deep_link(payload):
