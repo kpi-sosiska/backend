@@ -1,2 +1,5 @@
-aiogram==2.12.1
-Django==3.2
+aiogram
+Django
+aiohttp
+django-cachalot
+gunicorn

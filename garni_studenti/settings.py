@@ -4,10 +4,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'x-ovvleysc=*$@yyj=@+wx@_)h%@dqgl8wjo#pbjr7&$(2c%82'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
-BASE_URL = 'garni_studenti/'
 
 
 INSTALLED_APPS = [
@@ -19,8 +18,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mainapp',
     'botapp',
-    'parserapp'
+    # 'parserapp',
+    'cachalot'
 ]
+
+
+# CACHALOT_ONLY_CACHABLE_TABLES = 1123
+# CACHALOT_ONLY_CACHABLE_TABLES = {
+#     'mainapp_teacher', 'mainapp_group', 'mainapp_teacherngroup', 'mainapp_faculty', 'mainapp_cathedra'
+# }
+
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,6 +62,11 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
 
 
 LANGUAGE_CODE = 'ru-ru'
@@ -65,7 +77,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_URL = BASE_URL + 'static/'
+STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = [
 
