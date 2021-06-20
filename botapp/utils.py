@@ -45,7 +45,7 @@ def encode_start_group(group_id):
 
 
 def _encode_deep_link(*args):
-    payload = '-'.join(map(str, args))
+    payload = '|'.join(map(str, args))
     payload = deep_linking.encode_payload(payload)
     return f"t.me/{L['bot_username']}?start={payload}"
 
@@ -55,7 +55,7 @@ def decode_deep_link(payload):
         payload = deep_linking.decode_payload(payload)
     except Exception:
         return None, None
-    args = payload.split('-')
+    args = payload.split('|')
     return args
 
 

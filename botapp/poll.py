@@ -37,7 +37,7 @@ data:
 
 @dp.message_handler(commands=['start'], state='*', deep_link='t')
 async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[str, str]):
-    teacher_id, group_id = int(payload[0]), int(payload[1])
+    teacher_id, group_id = payload
     try:
         teacher_n_group = models.TeacherNGroup.objects.get(teacher_id=teacher_id, group_id=group_id)
     except (ValueError, models.TeacherNGroup.DoesNotExist):
