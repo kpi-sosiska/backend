@@ -1,4 +1,4 @@
-name: Push to container registry
+name: Push to dockerhub
 
 on:
   push:
