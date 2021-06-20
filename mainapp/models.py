@@ -146,7 +146,7 @@ class Result(models.Model):
                 if len(answers) == 1:
                     answers.append(None)
                 ResultAnswers.objects.create(result=result, question_id=question_id,
-                                             defaults=dict(answer_1=answers[0], answer_2=answers[1]))
+                                             answer_1=answers[0], answer_2=answers[1])
 
     class Meta:
         unique_together = ('user_id', 'teacher_n_group')
