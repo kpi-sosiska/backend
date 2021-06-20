@@ -1,0 +1,25 @@
+name: Push to container registry
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --tag svinerus/sova-backend:$(date +%s)
+
+      - name: Docker log in
+        run: docker login -u svinerus -p ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push image
+        run: docker push svinerus/sova-backend
