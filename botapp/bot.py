@@ -1,7 +1,8 @@
+import os
 import urllib.request
 from functools import partial
-from os import getenv
 
+import django
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.webhook import DEFAULT_WEB_PATH, get_new_configured_app
@@ -10,7 +11,7 @@ from aiohttp import web
 
 from botapp.utils import DeepLinkFilter
 
-TOKEN = getenv('bot_token')
+TOKEN = os.getenv('BOT_TOKEN')
 storage = MemoryStorage()
 
 bot = Bot(TOKEN, parse_mode='HTML')
@@ -25,6 +26,11 @@ start_polling = partial(executor.start_polling, dp)
 
 
 def start_webhook():
+    app = get_webapp()
+    web.run_app(app, port=os.getenv('bot_port'))
+
+
+def get_webapp():
     def get_ip():
         with urllib.request.urlopen("http://api.ipify.org/") as response:
             return response.read().decode('ascii')
@@ -37,4 +43,5 @@ def start_webhook():
 
     app.on_startup.append(set_webhook)
     # app.on_shutdown.append(on_shutdown)
-    web.run_app(app, port=getenv('bot_port'))
+
+    return app
