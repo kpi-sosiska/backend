@@ -1,44 +1,40 @@
-import asyncio
-import json
-import sys
-import traceback
+import urllib.request
+from functools import partial
 from os import getenv
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from django.http import HttpResponse
+from aiogram.dispatcher.webhook import DEFAULT_WEB_PATH, get_new_configured_app
+from aiogram.utils import executor
+from aiohttp import web
 
 from botapp.utils import DeepLinkFilter
 
 TOKEN = getenv('bot_token')
 storage = MemoryStorage()
 
-try:
-    bot = Bot(TOKEN, parse_mode='HTML')
-    dp = Dispatcher(bot, storage=storage)
-except Exception as ex:
-    print(ex)
-else:
-    dp.bind_filter(DeepLinkFilter)
-    if asyncio.get_event_loop().is_running():
-        asyncio.create_task(bot.me)
+bot = Bot(TOKEN, parse_mode='HTML')
+dp = Dispatcher(bot, storage=storage)
+dp.bind_filter(DeepLinkFilter)
 
-    # register handlers
-    from . import poll, other_cmds
+# register handlers
+from . import poll, other_cmds
 
 
-def set_webhook(url):
-    asyncio.run(bot.set_webhook(url))
+start_polling = partial(executor.start_polling, dp)
 
 
-async def webhook_update(request):
-    update_data = json.loads(request.body)
-    try:
-        Bot.set_current(bot)
-        Dispatcher.set_current(dp)
-        update_data = types.Update(**update_data)
-        await dp.process_updates([update_data])
-    except Exception:
-        traceback.print_exception(*sys.exc_info())
+def start_webhook():
+    def get_ip():
+        with urllib.request.urlopen("http://api.ipify.org/") as response:
+            return response.read().decode('ascii')
 
-    return HttpResponse('ok')
+    def set_webhook(_):
+        return bot.set_webhook(f"https://{get_ip()}{DEFAULT_WEB_PATH}")
+
+    app = get_new_configured_app(dp)
+    # app.add_routes([web.get('/url', handler)])  # todo maybe posting signal here
+
+    app.on_startup.append(set_webhook)
+    # app.on_shutdown.append(on_shutdown)
+    web.run_app(app, port=getenv('bot_port'))
