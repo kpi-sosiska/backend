@@ -3,14 +3,14 @@ from collections import defaultdict
 from django.contrib import admin
 from django.http import HttpResponse, JsonResponse
 
-from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty
+from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, Cathedra
 
 
 @admin.register(Locale)
 class LocaleAdmin(admin.ModelAdmin):
     empty_value_display = 'Не заполнено'
     list_display = ('key', 'value')
-    list_editable = ('value', )
+    list_editable = ('value',)
 
 
 #
@@ -18,26 +18,32 @@ class LocaleAdmin(admin.ModelAdmin):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     def export(self, request, queryset):
-        fac2group = defaultdict(list)
+        cath2group = defaultdict(list)
         for group in queryset:
-            fac2group[group.faculty.name].append(group)
+            cath2group[group.cathedra.name].append(group)
         text = "\n".join([
             f"{fac: ^30}\n" + '\n'.join([
                 f"{group.name: <20} {group.link()}"
                 for group in groups
             ])
-            for fac, groups in fac2group.items()
+            for fac, groups in cath2group.items()
         ])
         return HttpResponse(f"<pre>{text}</pre>")
+
+    def faculty(self, obj):
+        if obj.cathedra:
+            return obj.cathedra.faculty
 
     class TeacherInline(admin.TabularInline):
         model = TeacherNGroup
         extra = 1
 
-    list_display = ('name', 'faculty', 'link')
-    list_filter = ('faculty', )
-    search_fields = ('name', )
-    actions = ('export', )
+    readonly_fields = ('id',)
+    list_display = ('name', 'cathedra', 'faculty', 'link')
+    list_filter = ('cathedra__faculty', 'cathedra')
+    # list_editable = ('cathedra',)
+    search_fields = ('name',)
+    actions = ('export',)
     inlines = [
         TeacherInline,
     ]
@@ -45,10 +51,25 @@ class GroupAdmin(admin.ModelAdmin):
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    def faculties(self, obj):
-        return list(Faculty.objects.filter(group__teachers__id=obj.id).distinct())
+    class GroupInline(admin.TabularInline):
+        model = TeacherNGroup
+        extra = 0
 
-    list_display = ('name', 'faculties')
+    def faculties(self, obj):
+        return list(Faculty.objects.filter(cathedra__group__teachers__id=obj.id).distinct())
+
+    def c_own(self, obj: Teacher):
+        return list(obj.cathedras.all().distinct())
+
+    def c_groups(self, obj: Teacher):
+        return list(Cathedra.objects.filter(group__teacher=obj).distinct())
+
+    readonly_fields = ('id',)
+    list_display = ('name', 'faculties', 'lessons', 'c_own', 'c_groups')
+    list_editable = ('lessons',)
+    list_filter = ('groups__cathedra__faculty', 'cathedras')
+    search_fields = ('name',)
+    inlines = (GroupInline, )
 
 
 @admin.register(TeacherNGroup)
@@ -57,21 +78,27 @@ class TeacherNGroupAdmin(admin.ModelAdmin):
         return obj.group.faculty
 
     list_display = ('teacher', 'group', 'faculty', 'link')
+    list_filter = ('group__cathedra__faculty',)
 
 
 @admin.register(Faculty)
 class FacultyAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
     list_display = ('name', 'poll_result_link')
-    list_editable = ('poll_result_link', )
+    list_editable = ('poll_result_link',)
 
 
-#
+@admin.register(Cathedra)
+class CathedraAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+    list_display = ('name', 'faculty')
+    list_filter = ('faculty', )
 
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('question_text', 'answer_tip', 'is_for_eng', 'is_for_lec', 'is_for_pra', 'is_two_answers')
-    list_editable = ('answer_tip', )
+    list_editable = ('answer_tip',)
 
 
 @admin.register(Result)
@@ -106,9 +133,6 @@ class ResultAdmin(admin.ModelAdmin):
         ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter)
     )
     readonly_fields = ('date',)
-    raw_id_fields = ('teacher_n_group', )
-    actions = ('export', )
-    inlines = [
-        AnswerInline,
-    ]
-
+    raw_id_fields = ('teacher_n_group',)
+    actions = ('export',)
+    inlines = (AnswerInline, )
