@@ -58,17 +58,14 @@ class TeacherAdmin(admin.ModelAdmin):
     def faculties(self, obj):
         return list(Faculty.objects.filter(group__teachers__id=obj.id).distinct())
 
-    def c_own(self, obj: Teacher):
+    def _cathedras(self, obj: Teacher):
         return list(obj.cathedras.all().distinct())
-
-    def c_groups(self, obj: Teacher):
-        return list(Cathedra.objects.filter(group__teacher=obj).distinct())
 
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
 
     readonly_fields = ('rozklad_link',)
-    list_display = ('name', 'faculties', 'lessons', 'c_own', 'c_groups')
+    list_display = ('name', 'faculties', 'lessons', '_cathedras')
     list_editable = ('lessons',)
     list_filter = ('groups__faculty', 'cathedras')
     search_fields = ('name',)
