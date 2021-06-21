@@ -19,15 +19,15 @@ class LocaleAdmin(admin.ModelAdmin):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     def export(self, request, queryset):
-        cath2group = defaultdict(list)
+        fac2group = defaultdict(list)
         for group in queryset:
-            cath2group[group.cathedra.name].append(group)
+            fac2group[group.faculty.name].append(group)
         text = "\n".join([
             f"{fac: ^30}\n" + '\n'.join([
                 f"{group.name: <20} {group.link()}"
                 for group in groups
             ])
-            for fac, groups in cath2group.items()
+            for fac, groups in fac2group.items()
         ])
         return HttpResponse(f"<pre>{text}</pre>")
 
