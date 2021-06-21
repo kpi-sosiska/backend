@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.contrib import admin
 from django.http import HttpResponse, JsonResponse
+from django.utils.safestring import mark_safe
 
 from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, Cathedra
 
@@ -34,11 +35,14 @@ class GroupAdmin(admin.ModelAdmin):
         if obj.cathedra:
             return obj.cathedra.faculty
 
+    def rozklad_link(self, obj):
+        return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g={obj.id}">{obj.id}</a>')
+
     class TeacherInline(admin.TabularInline):
         model = TeacherNGroup
         extra = 1
 
-    readonly_fields = ('id',)
+    readonly_fields = ('rozklad_link',)
     list_display = ('name', 'cathedra', 'faculty', 'link')
     list_filter = ('cathedra__faculty', 'cathedra')
     # list_editable = ('cathedra',)
@@ -64,7 +68,10 @@ class TeacherAdmin(admin.ModelAdmin):
     def c_groups(self, obj: Teacher):
         return list(Cathedra.objects.filter(group__teacher=obj).distinct())
 
-    readonly_fields = ('id',)
+    def rozklad_link(self, obj):
+        return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
+
+    readonly_fields = ('rozklad_link',)
     list_display = ('name', 'faculties', 'lessons', 'c_own', 'c_groups')
     list_editable = ('lessons',)
     list_filter = ('groups__cathedra__faculty', 'cathedras')
