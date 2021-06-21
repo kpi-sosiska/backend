@@ -31,10 +31,6 @@ class GroupAdmin(admin.ModelAdmin):
         ])
         return HttpResponse(f"<pre>{text}</pre>")
 
-    def faculty(self, obj):
-        if obj.cathedra:
-            return obj.cathedra.faculty
-
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g={obj.id}">{obj.id}</a>')
 
@@ -43,9 +39,9 @@ class GroupAdmin(admin.ModelAdmin):
         extra = 1
 
     readonly_fields = ('rozklad_link',)
-    list_display = ('name', 'cathedra', 'faculty', 'link')
-    list_filter = ('cathedra__faculty', 'cathedra')
-    # list_editable = ('cathedra',)
+    list_display = ('name', 'faculty', 'link')
+    list_filter = ('faculty', )
+    list_editable = ('faculty', )
     search_fields = ('name',)
     actions = ('export',)
     inlines = [
@@ -60,7 +56,7 @@ class TeacherAdmin(admin.ModelAdmin):
         extra = 0
 
     def faculties(self, obj):
-        return list(Faculty.objects.filter(cathedra__group__teachers__id=obj.id).distinct())
+        return list(Faculty.objects.filter(group__teachers__id=obj.id).distinct())
 
     def c_own(self, obj: Teacher):
         return list(obj.cathedras.all().distinct())
@@ -74,7 +70,7 @@ class TeacherAdmin(admin.ModelAdmin):
     readonly_fields = ('rozklad_link',)
     list_display = ('name', 'faculties', 'lessons', 'c_own', 'c_groups')
     list_editable = ('lessons',)
-    list_filter = ('groups__cathedra__faculty', 'cathedras')
+    list_filter = ('groups__faculty', 'cathedras')
     search_fields = ('name',)
     inlines = (GroupInline, )
 
@@ -85,7 +81,7 @@ class TeacherNGroupAdmin(admin.ModelAdmin):
         return obj.group.faculty
 
     list_display = ('teacher', 'group', 'faculty', 'link')
-    list_filter = ('group__cathedra__faculty',)
+    list_filter = ('group__faculty',)
 
 
 @admin.register(Faculty)

@@ -63,12 +63,8 @@ class Teacher(models.Model):
 class Group(models.Model):
     id = models.CharField(max_length=36, primary_key=True)
     name = models.CharField('Код', max_length=20)
-    cathedra = models.ForeignKey(Cathedra, models.CASCADE, verbose_name='Кафедра', null=True)
+    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет', null=True)
     teachers = models.ManyToManyField(Teacher, through='TeacherNGroup')
-
-    @property
-    def faculty(self):
-        return self.cathedra.faculty
 
     @classmethod
     def add(cls, id_, name, cathedra):
@@ -85,7 +81,7 @@ class Group(models.Model):
         return encode_start_group(self.id)
 
     def __str__(self):
-        return self.name
+        return f"self.name ({self.faculty.name}"
 
     class Meta:
         verbose_name = "Группа"
