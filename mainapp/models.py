@@ -138,7 +138,7 @@ class Question(models.Model):
 
 
 class Result(models.Model):
-    user_id = models.PositiveIntegerField('ID ответившего')
+    user_id = models.CharField('ID ответившего', max_length=32)
     teacher_n_group = models.ForeignKey(TeacherNGroup, models.CASCADE, verbose_name='Препод и группа')
     teacher_type = models.CharField('Тип опросника', max_length=20,
                                     choices=TEACHER_TYPE.items(), default=list(TEACHER_TYPE)[0])

@@ -2,6 +2,7 @@ import json
 import logging
 import uuid
 from base64 import urlsafe_b64decode, urlsafe_b64encode
+from hashlib import md5
 
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
@@ -86,3 +87,7 @@ class DeepLinkFilter(BoundFilter):
         cmd, payload = decode_deep_link(payload)
         if cmd == self.deep_link:
             return {'payload': payload}
+
+
+def hash_(user_id):
+    return md5(str(user_id).encode('ascii')).hexdigest()

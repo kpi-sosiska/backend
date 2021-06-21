@@ -1,8 +1,6 @@
 import os
-import urllib.request
 from functools import partial
 
-import django
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.webhook import DEFAULT_WEB_PATH, get_new_configured_app

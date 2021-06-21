@@ -9,7 +9,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.markdown import hbold, hitalic, hide_link
 from django.db.models.aggregates import Count
 
-from botapp.utils import question_keyboard, teachers_links
+from botapp.utils import hash_, question_keyboard, teachers_links
 from mainapp import models
 from mainapp.models import Locale as L
 from .bot import dp
@@ -45,12 +45,12 @@ async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[s
 
     await state.set_data(dict(teacher_n_group=teacher_n_group))
 
-    results_from_other_group = models.Result.objects.filter(user_id=message.from_user.id)\
+    results_from_other_group = models.Result.objects.filter(user_id=hash_(message.from_user.id))\
                                                     .exclude(teacher_n_group__group=teacher_n_group.group)
     if results_from_other_group:
         return await two_group_one_user_start(message, state, results_from_other_group)
 
-    if models.Result.objects.filter(user_id=message.from_user.id, teacher_n_group=teacher_n_group).count():
+    if models.Result.objects.filter(user_id=hash_(message.from_user.id), teacher_n_group=teacher_n_group).count():
         await message.answer(L['same_teacher_again'])
 
     await start_teacher(message, state)
@@ -149,7 +149,7 @@ async def open_question_query_handler(message: types.Message, state: FSMContext)
 async def save_to_db(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         try:
-            models.Result.add(message.from_user.id, data['teacher_n_group'],
+            models.Result.add(hash_(message.from_user.id), data['teacher_n_group'],
                               data['teacher_type'], data['open_q'], data['q2a'])
         except Exception:
             await message.answer(L['result_save_error'], reply_markup=types.ReplyKeyboardRemove())
@@ -165,7 +165,7 @@ async def other_teachers_in_group(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         group = data['teacher_n_group'].group
 
-    teachers = group.teachers.exclude(teacherngroup__result__user_id=message.from_user.id) \
+    teachers = group.teachers.exclude(teacherngroup__result__user_id=hash_(message.from_user.id)) \
                     .annotate(results_cnt=Count('teacherngroup__result')).order_by('results_cnt')
     if not teachers:
         return
@@ -199,7 +199,7 @@ async def two_group_one_user_handler(query: types.CallbackQuery, state: FSMConte
 
     async with state.proxy() as data:
         teacher_n_group = data['teacher_n_group']
-    models.Result.objects.filter(user_id=query.from_user.id) \
+    models.Result.objects.filter(user_id=hash_(query.from_user.id)) \
                          .exclude(teacher_n_group__group=teacher_n_group.group).delete()
     await query.message.edit_reply_markup()
     await start_teacher(query.message, state)
