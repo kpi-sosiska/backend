@@ -1,5 +1,6 @@
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Count, Q
+from django.utils import timezone
 
 atomic = transaction.atomic
 
@@ -65,6 +66,11 @@ class Group(models.Model):
     name = models.CharField('Код', max_length=20)
     faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет', null=True)
     teachers = models.ManyToManyField(Teacher, through='TeacherNGroup')
+
+    def teacher_need_votes(self):
+        return self.teachers.all().annotate(
+            results_cnt=Count('teacherngroup__result', filter=Q(teacherngroup__result__time_finish__isnull=False))
+        ).order_by('results_cnt')
 
     @classmethod
     def add(cls, id_, name, cathedra):
@@ -140,19 +146,27 @@ class Question(models.Model):
 class Result(models.Model):
     user_id = models.CharField('ID ответившего', max_length=32)
     teacher_n_group = models.ForeignKey(TeacherNGroup, models.CASCADE, verbose_name='Препод и группа')
-    teacher_type = models.CharField('Тип опросника', max_length=20,
+    teacher_type = models.CharField('Тип опросника', max_length=20, null=True,
                                     choices=TEACHER_TYPE.items(), default=list(TEACHER_TYPE)[0])
 
     open_question_answer = models.TextField('Ответ свободного микрофона', null=True, blank=True)
 
-    date = models.DateTimeField('Дата прохождения', auto_now_add=True)
+    time_start = models.DateTimeField('Время начала прохождения', auto_now_add=True)
+    time_finish = models.DateTimeField('Время окончания прохождения', null=True, default=None)
+
+    @classmethod
+    def filter_finished(cls):
+        return cls.objects.filter(time_finish__isnull=False)
 
     @classmethod
     def add(cls, user_id, teacher_n_group, teacher_type, open_question_answer, other_answers):
         with atomic():
             result, _ = cls.objects.update_or_create(
-                user_id=user_id, teacher_n_group=teacher_n_group, defaults=dict(
-                    teacher_type=teacher_type, open_question_answer=open_question_answer
+                user_id=user_id, teacher_n_group=teacher_n_group,
+                defaults=dict(
+                    time_finish=timezone.now(),
+                    teacher_type=teacher_type,
+                    open_question_answer=open_question_answer
                 ))
 
             ResultAnswers.objects.filter(result=result).delete()  # удалить старые результаты (если это перепрохождение)

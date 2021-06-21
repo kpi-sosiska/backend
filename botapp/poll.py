@@ -7,7 +7,6 @@ from aiogram import types, exceptions
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.markdown import hbold, hitalic, hide_link
-from django.db.models.aggregates import Count
 
 from botapp.utils import hash_, question_keyboard, teachers_links
 from mainapp import models
@@ -45,12 +44,12 @@ async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[s
 
     await state.set_data(dict(teacher_n_group=teacher_n_group))
 
-    results_from_other_group = models.Result.objects.filter(user_id=hash_(message.from_user.id))\
-                                                    .exclude(teacher_n_group__group=teacher_n_group.group)
-    if results_from_other_group:
-        return await two_group_one_user_start(message, state, results_from_other_group)
+    # если у челика есть прохождения опроса с других групп то предупреждаем
+    if await two_group_one_user(message, state):
+        return
 
-    if models.Result.objects.filter(user_id=hash_(message.from_user.id), teacher_n_group=teacher_n_group).count():
+    if models.Result.filter_finished().filter(user_id=hash_(message.from_user.id),
+                                              teacher_n_group=teacher_n_group).count():
         await message.answer(L['same_teacher_again'])
 
     await start_teacher(message, state)
@@ -59,6 +58,9 @@ async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[s
 async def start_teacher(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         teacher = data['teacher_n_group'].teacher
+
+    # save poll started
+    models.Result(user_id=hash_(message.from_user.id), teacher_n_group=data['teacher_n_group']).save()
 
     await message.answer(hide_link(teacher.photo) + L['teacher_text'].format(teacher=teacher))
     if teacher.is_eng:
@@ -71,7 +73,7 @@ async def start_teacher(message: types.Message, state: FSMContext):
 async def teacher_type_start(message: types.Message):
     keyboard = types.InlineKeyboardMarkup(row_width=2).add(*[
         types.InlineKeyboardButton(L[f'teacher_type_{type_}'], callback_data=type_)
-        for type_ in list(models.TEACHER_TYPE.keys())[:-1]
+        for type_ in list(models.TEACHER_TYPE.keys())[:-1]  # типы кроме англ
     ])
     await message.answer(L['choose_teacher_type'], reply_markup=keyboard)
     await PollStates.teacher_type.set()
@@ -93,8 +95,9 @@ async def questions_start(message: types.Message, state: FSMContext):
     async def _send_msg(question_):
         for _ in range(5):
             try:
-                await message.answer(hbold(question_.question_text) + '\n' * 2 + hitalic(question_.answer_tip),
-                                     reply_markup=question_keyboard(question_, teacher_type))
+                text = hbold(question_.question_text) + \
+                       ('\n\n' + hitalic(question_.answer_tip) if question.answer_tip else '')
+                await message.answer(text, reply_markup=question_keyboard(question_, teacher_type))
                 await asyncio.sleep(0.1)
                 return
             except exceptions.RetryAfter as ex:
@@ -119,12 +122,13 @@ async def questions_handler(query: types.CallbackQuery, state: FSMContext):
 
     async with state.proxy() as data:
         data['q2a'][question_id][row_n] = answer
+
     keyboard = question_keyboard(models.Question.objects.get(id=question_id),
                                  teacher_type=data['teacher_type'], answers=data['q2a'][question_id])
     with suppress(exceptions.MessageNotModified):
         await query.message.edit_reply_markup(keyboard)
 
-    if not [1 for answers in data['q2a'].values() for answer in answers if answer is None]:
+    if all(answer is not None for answers in data['q2a'].values() for answer in answers):
         await open_question_start(query.message)
 
 
@@ -165,13 +169,16 @@ async def other_teachers_in_group(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         group = data['teacher_n_group'].group
 
-    teachers = group.teachers.exclude(teacherngroup__result__user_id=hash_(message.from_user.id)) \
-                    .annotate(results_cnt=Count('teacherngroup__result')).order_by('results_cnt')
-    if not teachers:
-        return
-    teachers = teachers_links(teachers, group.id)
-    text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(), teachers=teachers)
-    await message.answer(text)
+    # преподы которых еще нужно пройти отсортированные по кол-ву прохождений
+    teachers = group.teacher_need_votes(). \
+        exclude(teacherngroup__result__user_id=hash_(message.from_user.id),
+                teacherngroup__result__time_finish__isnull=False)
+
+    if teachers:
+        teachers = teachers_links(teachers, group.id)
+        text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(), teachers=teachers)
+        await message.answer(text)
+
 
 #
 
@@ -179,16 +186,25 @@ async def other_teachers_in_group(message: types.Message, state: FSMContext):
 KEYBOARD_2G1U = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(L['btn_reset_2g1u'], callback_data='reset'))
 
 
-async def two_group_one_user_start(message: types.Message, state: FSMContext, results_from_other_group):
-    other_group = results_from_other_group[0].teacher_n_group.group.name.upper()
+async def two_group_one_user(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        cur_group = data['teacher_n_group'].group.name.upper()
+        teacher_n_group = data['teacher_n_group']
+
+    results_from_other_group = models.Result.filter_finished().filter(user_id=hash_(message.from_user.id)) \
+        .exclude(teacher_n_group__group=teacher_n_group.group)
+
+    if not results_from_other_group:
+        return False
+
+    cur_group = teacher_n_group.group.name.upper()
+    other_group = results_from_other_group[0].teacher_n_group.group.name.upper()
 
     await message.answer(
         L['two_group_one_user'].format(other_group=other_group, cur_group=cur_group),
         reply_markup=KEYBOARD_2G1U
     )
     await PollStates.two_group_one_user.set()
+    return True
 
 
 @dp.callback_query_handler(state=PollStates.two_group_one_user)
@@ -200,6 +216,6 @@ async def two_group_one_user_handler(query: types.CallbackQuery, state: FSMConte
     async with state.proxy() as data:
         teacher_n_group = data['teacher_n_group']
     models.Result.objects.filter(user_id=hash_(query.from_user.id)) \
-                         .exclude(teacher_n_group__group=teacher_n_group.group).delete()
+        .exclude(teacher_n_group__group=teacher_n_group.group).delete()
     await query.message.edit_reply_markup()
     await start_teacher(query.message, state)

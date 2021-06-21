@@ -31,6 +31,7 @@ class GroupAdmin(admin.ModelAdmin):
         ])
         return HttpResponse(f"<pre>{text}</pre>")
 
+    @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g={obj.id}">{obj.id}</a>')
 
@@ -55,12 +56,15 @@ class TeacherAdmin(admin.ModelAdmin):
         model = TeacherNGroup
         extra = 0
 
+    @admin.display(description='Факультеты')
     def faculties(self, obj):
         return list(Faculty.objects.filter(group__teachers__id=obj.id).distinct())
 
+    @admin.display(description='Кафедры')
     def _cathedras(self, obj: Teacher):
         return list(obj.cathedras.all().distinct())
 
+    @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
 
@@ -74,6 +78,7 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(TeacherNGroup)
 class TeacherNGroupAdmin(admin.ModelAdmin):
+    @admin.display(description='Факультет')
     def faculty(self, obj):
         return obj.group.faculty
 
@@ -107,9 +112,25 @@ class ResultAdmin(admin.ModelAdmin):
         model = ResultAnswers
         extra = 0
 
+    class IsFinishedListFilter(admin.SimpleListFilter):
+        title = 'Закончил опрос'
+        parameter_name = 'is_finished'
+
+        def lookups(self, request, model_admin):
+            return (('1', 'Закончил опрос'),
+                    ('0', 'Не закончил опрос'))
+
+        def queryset(self, request, queryset):
+            if self.value() is None:
+                return queryset
+            is_finished = int(self.value() or 0)
+            return queryset.filter(time_finish__isnull=not is_finished)
+
+    @admin.display(description='Препод')
     def teacher(self, obj):
         return obj.teacher_n_group.teacher
 
+    @admin.display(description='Группа')
     def group(self, obj):
         return obj.teacher_n_group.group
 
@@ -127,12 +148,17 @@ class ResultAdmin(admin.ModelAdmin):
         ]
         return JsonResponse(data, safe=False)
 
-    list_display = ('user_id', 'teacher', 'group', 'teacher_type')
+    @admin.display(description='Закончил опрос', boolean=True)
+    def is_finished(self, obj):
+        return obj.time_finish is not None
+
+    list_display = ('user_id', 'teacher', 'group', 'teacher_type', 'is_finished')
     list_filter = (
         ('teacher_n_group__teacher', admin.RelatedOnlyFieldListFilter),
-        ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter)
+        ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter),
+        IsFinishedListFilter
     )
-    readonly_fields = ('date',)
+    readonly_fields = ('time_start', 'time_finish')
     raw_id_fields = ('teacher_n_group',)
     actions = ('export',)
     inlines = (AnswerInline, )
