@@ -1,0 +1,26 @@
+name: Push to dockerhub
+
+on:
+  push:
+    branches:
+      - master
+      - action
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --tag svinerus/sova-backend:latest
+
+      - name: Docker log in
+        run: docker login -u svinerus -p ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push image
+        run: docker push svinerus/sova-backend:latest
