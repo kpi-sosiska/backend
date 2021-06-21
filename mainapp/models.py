@@ -81,7 +81,7 @@ class Group(models.Model):
         return encode_start_group(self.id)
 
     def __str__(self):
-        return f"self.name ({self.faculty.name}"
+        return f"{self.name} ({self.faculty})"
 
     class Meta:
         verbose_name = "Группа"
