@@ -69,7 +69,7 @@ def decode_deep_link(payload_text):
         ]
         return bytes([type_]).decode(), uuids
     except Exception:
-        logging.exception("wrong payload", payload_text)
+        logging.exception("wrong payload" + payload_text)
         return None, []
 
 
@@ -81,6 +81,8 @@ class DeepLinkFilter(BoundFilter):
 
     async def check(self, message: types.Message):
         payload = message.get_args()
+        if not payload:
+            return
         cmd, payload = decode_deep_link(payload)
         if cmd == self.deep_link:
             return {'payload': payload}
