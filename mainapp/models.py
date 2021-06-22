@@ -64,7 +64,7 @@ class Teacher(models.Model):
 class Group(models.Model):
     id = models.CharField(max_length=36, primary_key=True)
     name = models.CharField('Код', max_length=20)
-    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет', null=True)
+    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет', null=True, blank=True)
     teachers = models.ManyToManyField(Teacher, through='TeacherNGroup')
 
     def teacher_need_votes(self):
