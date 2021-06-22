@@ -37,7 +37,17 @@ class GroupAdmin(admin.ModelAdmin):
 
     @admin.display(description='Преподы')
     def teacher_list(self, obj):
-        return '; '.join(obj.teachers.all().values_list('name', flat=True).distinct())
+        def shortify(t):
+            if '.' in t:
+                return t
+            try:
+                p = t.split(' ')
+                return f"{p[0]} {p[1][0]}. {p[2][0]}"
+            except:
+                return t
+        teachers = obj.teachers.all().values_list('name', flat=True).distinct()
+        teachers = [shortify(t) for t in teachers]
+        return '; '.join(teachers)
 
     class TeacherInline(admin.TabularInline):
         model = TeacherNGroup
