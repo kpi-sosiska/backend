@@ -35,12 +35,16 @@ class GroupAdmin(admin.ModelAdmin):
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g={obj.id}">{obj.id}</a>')
 
+    @admin.display(description='Преподы')
+    def teacher_list(self, obj):
+        return '; '.join(obj.teachers.all().values_list('name', flat=True).distinct())
+
     class TeacherInline(admin.TabularInline):
         model = TeacherNGroup
         extra = 1
 
-    readonly_fields = ('rozklad_link',)
-    list_display = ('name', 'faculty', 'link')
+    readonly_fields = ('rozklad_link', 'link')
+    list_display = ('name', 'faculty', 'teacher_list')
     list_filter = ('faculty', )
     list_editable = ('faculty', )
     search_fields = ('name',)
@@ -76,14 +80,14 @@ class TeacherAdmin(admin.ModelAdmin):
     inlines = (GroupInline, )
 
 
-@admin.register(TeacherNGroup)
-class TeacherNGroupAdmin(admin.ModelAdmin):
-    @admin.display(description='Факультет')
-    def faculty(self, obj):
-        return obj.group.faculty
-
-    list_display = ('teacher', 'group', 'faculty', 'link')
-    list_filter = ('group__faculty',)
+# @admin.register(TeacherNGroup)
+# class TeacherNGroupAdmin(admin.ModelAdmin):
+#     @admin.display(description='Факультет')
+#     def faculty(self, obj):
+#         return obj.group.faculty
+#
+#     list_display = ('teacher', 'group', 'faculty', 'link')
+#     list_filter = ('group__faculty',)
 
 
 @admin.register(Faculty)
