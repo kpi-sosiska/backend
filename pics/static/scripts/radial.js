@@ -27,7 +27,8 @@ const getChartOptions = type => (
                 fontColor: styles[type].fontColor
             }
         },
-        legend: {display: false}
+        legend: {display: false},
+        animation: false
     }
 )
 

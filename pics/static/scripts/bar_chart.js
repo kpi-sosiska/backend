@@ -21,7 +21,8 @@ const getBarChartOptions = type => (
                 }
             }]
         },
-        legend: {display: false}
+        legend: {display: false},
+        animation: false
     }
 )
 
