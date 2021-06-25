@@ -7,7 +7,7 @@ from mainapp.models import TEACHER_TYPE
 default_pic = 'https://cdn.shopify.com/s/files/1/0239/7947/products/hog_e69123f6-2e01-4ddb-9d8f-66bbd9d6d7a4_2048x2048.png?v=1571265926'
 
 
-def render_html(request):
+def main(request):
     teacher_type = 'LECTOR_PRACTIC'
     context = {
         'teacher_name': 'Головач Елена Совухина',
