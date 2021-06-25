@@ -1,17 +1,13 @@
 import json
 
-from django.http import HttpResponse
 from django.shortcuts import render
-
-# Create your views here.
-from django.template.loader import render_to_string
 
 from mainapp.models import TEACHER_TYPE
 
 default_pic = 'https://cdn.shopify.com/s/files/1/0239/7947/products/hog_e69123f6-2e01-4ddb-9d8f-66bbd9d6d7a4_2048x2048.png?v=1571265926'
 
 
-def render_html():
+def main(request):
     teacher_type = 'LECTOR_PRACTIC'
     context = {
         'teacher_name': 'Головач Елена Совухина',
@@ -40,9 +36,7 @@ def render_html():
                  "Достатність матеріалів": 4.636363636363637,
                  "Наявність переліку питань": 4.2727272727272725,
 
-
                  "Об'єктивність оцінювання": 4.545454545454546,
-
                  "Бали без знань": 4.363636363636363,
                  "Пунктуальність": 4.636363636363637,
                  "Своєчасність інформування": 4.545454545454546,
@@ -52,17 +46,10 @@ def render_html():
                  "Своєчасність інформування *": 4.4411764705882355,
                  "Пунктуальність *": 4.5588235294117645,
                  "Бали без знань *": 4.147058823529412,
-
                  "Об'єктивність оцінювання *": 4.5,
-
-
-
 
                  "Зручність здачі завдань": 4.294117647058823,
                  "Актуальність матеріалу": 4,
-
-
-
              },
              "barChart": {"Якість викладання": [1, 0, 0, 1, 9],
                           "Якість викладання *": [1, 0, 0, 1, 9],
@@ -70,8 +57,5 @@ def render_html():
                           }
              })
     }
-    return render_to_string(context['teacher_type'] + '.html', context)
 
-
-def main(request):
-    return HttpResponse(render_html())
+    return render(request, context['teacher_type'] + '.html', context)
