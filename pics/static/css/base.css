@@ -10,7 +10,6 @@ body {
 .form {
     box-sizing: border-box;
     background-color: var(--background_color);
-    font-weight: bold;
     display: grid;
     grid-template-columns: 32% 68%;
     padding: 100px 100px 0px 100px;
@@ -41,6 +40,7 @@ body {
 }
 
 .teacher-name {
+    font-weight: bold;
     font-size: 35px;
     height: 70px;
     margin-top: 55px;
@@ -95,7 +95,6 @@ body {
 .education-description {
     font-size: 28px;
     line-height: 30px;
-    font-weight: normal;
 }
 
 .helper-div {
@@ -103,9 +102,11 @@ body {
 }
 
 .mark {
+    font-weight: bold;
     font-size: 70px;
 }
 .mark-percent {
+    font-weight: bold;
     font-size: 75px;
 }
 .mark-percent:after {
@@ -114,13 +115,13 @@ body {
 
 .mark-description {
     font-size: 24px;
-    font-weight: normal;
     width: 190px;
 }
 
 
 
 .respondents-count {
+    font-weight: bold;
     font-size: 40px;
     text-align: left;
 }
@@ -128,7 +129,6 @@ body {
 .respondents-count-description {
     font-size: 24px;
     text-align: left;
-    font-weight: normal;
 }
 
 
