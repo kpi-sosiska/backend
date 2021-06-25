@@ -1,26 +1,6 @@
-{% load static %}
-{% load l10n %}
+{% extends 'base_.html' %}
 
-{% localize off %}
-
-<!DOCTYPE html>
-<html>
-<head>
-  <script>const teacherData = {{ json|safe }}</script>
-  <meta charset="UTF-8">
-  <script type="module" src="{% static 'scripts/Chart.min.js' %}"></script>
-  <script type="module" src="{% static 'scripts/initialize.js' %}"></script>
-  <link rel="stylesheet" href="{% static 'css/reset.css' %}">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% get_static_prefix %}css/{{ teacher_type }}.css">
-{#  todo move styles to html#}
-</head>
-
-<body>
-<div class="form" id="form">
-
-  <div class="left-info">
-
+{% block left %}
     <div class="teacher-face-and-name">
       <div class="img-container">
         <img class="teacher-face" src="{{ teacher_photo }}" alt="teacher's face">
@@ -80,14 +60,9 @@
 
       </div>
     </div>
-  </div>
+  {% endblock %}
 
-
-  <div class="right-info">
-
-    <div class="radial">
-      <canvas id="radial-diagram"></canvas>
-    </div>
+    {% block right %}
 
     <div class="graphs graph-bars">
 
@@ -109,11 +84,8 @@
       </div>
 
     </div>
-  </div>
-</div>
-<div class="semester-and-year">
-  <p>2020-2021, І семестр</p>
-</div>
-</body>
-</html>
-{% endlocalize %}
+{% endblock %}
+
+{% block semestr %}
+  2020-2021, І семестр
+{% endblock %}

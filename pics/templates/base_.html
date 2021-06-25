@@ -1,0 +1,43 @@
+{% load static %}
+{% load l10n %}
+
+{% localize off %}
+
+<!DOCTYPE html>
+<html lang="html5">
+
+  <head>
+    <script>const teacherData = {{ json|safe }}</script>
+    <meta charset="UTF-8">
+    <script type="module" src="{% static 'scripts/Chart.min.js' %}"></script>
+    <script type="module" src="{% static 'scripts/initialize.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% get_static_prefix %}css/{{ teacher_type }}.css">
+    {#  todo move styles to html#}
+  </head>
+
+  <body>
+  <div class="form" id="form">
+
+    <div class="left-info">
+      {% block left %}{% endblock %}
+    </div>
+
+    <div class="right-info">
+      <div class="radial">
+        <canvas id="radial-diagram"></canvas>
+      </div>
+      {% block right %}{% endblock %}
+    </div>
+
+  </div>
+
+  <div class="semester-and-year">
+    <p>{% block semestr %} {% endblock %}</p>
+  </div>
+
+  </body>
+</html>
+
+{% endlocalize %}
