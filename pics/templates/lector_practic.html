@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+
+{% block graphs1 %}
+  <div>
+    <p class="mark-percent">{{ want_to_continue }}</p>
+    <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати як <b>ЛЕКТОР</b>
+    </p>
+  </div>
+  <div>
+    <p class="mark-percent">{{ want_to_continue_p }}</p>
+    <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати як <b></b>ПРАКТИК</b>
+    </p>
+  </div>
+{% endblock %}
+
+
+
+
+
+
+{% block graphs4 %}
+  <div class="graph-education">
+    <div class="helper-div">
+      <canvas class="graph" id="education-quality-lector"></canvas>
+    </div>
+    <p class="education-description">Задоволення викладанням дисципліни (лектор)</p>
+  </div>
+  <div class="graph-education">
+    <div class="helper-div">
+      <canvas class="graph" id="education-quality-practic"></canvas>
+    </div>
+    <p class="education-description">Задоволення викладанням дисципліни (практик)</p>
+  </div>
+{% endblock %}
+

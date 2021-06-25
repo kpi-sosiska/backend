@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+
+
+{% block graphs2 %}
+  <div>
+    <p class="mark">{{ meaningfulness }}</p>
+    <p class="mark-description">Змістовність занять</p>
+  </div>
+  <div>
+    <p class="mark">{{ grading_system }}</p>
+    <p class="mark-description">Система оцінювання</p>
+  </div>
+{% endblock %}
+
+
+
+{% block respondents %}
+  <p class="respondents-count">5</p>
+  <p class="respondents-count-description">кількість опитаних</p>
+{% endblock %}
+
