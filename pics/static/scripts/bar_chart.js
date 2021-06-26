@@ -12,13 +12,15 @@ const getBarChartOptions = type => (
                     fontColor: styles[type].fontColor,
                     fontSize: 25,
                     maxTicksLimit: 6
-                }
+                },
+                gridLines: {display: false},
             }],
             xAxes: [{
                 ticks: {
                     fontColor: styles[type].fontColor,
                     fontSize: 25,
-                }
+                },
+                gridLines: {display: false},
             }]
         },
         legend: {display: false},
