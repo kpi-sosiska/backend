@@ -13,8 +13,7 @@
     <script type="module" src="{% static 'scripts/initialize.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/reset.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% get_static_prefix %}css/{{ teacher_type }}.css">
-    {#  todo move styles to html#}
+    <style>{% block style %}{% endblock %}</style>
   </head>
 
   <body>
