@@ -53,7 +53,7 @@
     <div class="graphs respondents">
       <div>
         {% block respondents %}
-          <p class="respondents-count">5/4/42</p>
+          <p class="respondents-count">{{ responses|join:" / " }}</p>
           <p class="respondents-count-description">кількість опитаних <br>
             (лектор/практик/лектор+практик)</p>
         {% endblock %}

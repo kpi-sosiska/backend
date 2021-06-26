@@ -25,11 +25,10 @@ def main(request):
         'cheating': 1.2,
         'skills': 5,
 
-        'responses': '5/4/42',
+        'responses': [5, 4, 42],
 
         'json': json.dumps(
             {"type": teacher_type.lower(),
-             "responses": [4, 7, 27],
              "radial": {
                  "politeness": 4.526315789473684,
 
