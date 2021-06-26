@@ -1,18 +1,18 @@
-*{
-  --font_color: #fee6ff;
-  --background_color: #19081a;
+* {
+    --font_color: #fee6ff;
+    --background_color: #19081a;
 }
 
-.form {
-  padding: 80px 80px 0px 80px;
+.main {
+    padding: 80px 80px 0px 80px;
 }
 
 .right-info {
-  padding: 0 0 70px 30px;
+    padding: 0 0 70px 30px;
 }
 
 .helper-div {
-  height: 300px;
+    height: 300px;
 }
 
 .graph-bars {

@@ -1,25 +1,24 @@
-body {
-    display: flex;
-    background: lightcoral;
-    font-family: 'Roboto', sans-serif;
-    width: 1500px;
-    height: 1500px;
-    flex-direction: column;
-}
-
 .form {
-    box-sizing: border-box;
-    background-color: var(--background_color);
-    display: grid;
-    grid-template-columns: 32% 68%;
-    padding: 100px 100px 0px 100px;
-    margin: 0;
+    font-family: 'Lato', sans-serif;
     width: 1500px;
     height: 1500px;
-    overflow: hidden;
+    background-color: var(--background_color);
     color: var(--font_color);
     line-height: normal;
     text-align: center;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 32% 68%;
+    padding: 100px 100px 0px 100px;
+}
+
+.right-info {
+    padding: 0 0 0 50px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
 }
 
 .teacher-face-and-name {
@@ -53,20 +52,6 @@ body {
     margin-top: 20px;
 }
 
-.left-info {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
-.right-info {
-    overflow: hidden;
-    padding: 0 0 0 50px;
-    box-sizing: border-box;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
-}
 
 .radial {
     height: 758px;
@@ -74,10 +59,7 @@ body {
 
 .general-numbers {
     display: flex;
-    justify-content: space-between;
-    flex-direction: column;
     flex-flow: column nowrap;
-    height: 53.5%;
     padding-top: 30px;
 }
 
@@ -85,21 +67,23 @@ body {
 .graphs {
     display: flex;
     justify-content: space-around;
+    margin: 15px 0;
+
+}
+
+.helper-div {
+    height: 417px
 }
 
 .graph-education {
     width: 50%;
 }
 
-
 .education-description {
     font-size: 28px;
     line-height: 30px;
 }
 
-.helper-div {
-    height: 417px
-}
 
 .mark {
     font-weight: bold;
@@ -136,9 +120,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    height: 100px;
-    padding-bottom: 20px;
+    height: 70px;
     font-size: 30px;
-    color: var(--font_color);
-    background-color: var(--background_color);
 }

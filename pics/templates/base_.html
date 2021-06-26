@@ -3,8 +3,8 @@
 
 {% localize off %}
 
-<!DOCTYPE html>
-<html lang="html5">
+  <!DOCTYPE html>
+  <html lang="html5">
 
   <head>
     <script>const teacherData = {{ json|safe }}</script>
@@ -19,25 +19,26 @@
 
   <body>
   <div class="form" id="form">
-
-    <div class="left-info">
-      {% block left %}{% endblock %}
-    </div>
-
-    <div class="right-info">
-      <div class="radial">
-        <canvas id="radial-diagram"></canvas>
+    <div class="main">
+      <div class="left-info">
+        {% block left %}{% endblock %}
       </div>
-      {% block right %}{% endblock %}
+
+      <div class="right-info">
+        <div class="radial">
+          <canvas id="radial-diagram"></canvas>
+        </div>
+        {% block right %}{% endblock %}
+      </div>
+    </div>
+    <div class="semester-and-year">
+      <p>{% block semestr %} {% endblock %}</p>
     </div>
 
   </div>
 
-  <div class="semester-and-year">
-    <p>{% block semestr %} {% endblock %}</p>
-  </div>
 
   </body>
-</html>
+  </html>
 
 {% endlocalize %}

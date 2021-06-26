@@ -1,89 +1,90 @@
 {% extends 'base_.html' %}
 
 {% block left %}
-    <div class="teacher-face-and-name">
-      <div class="img-container">
-        <img class="teacher-face" src="{{ teacher_photo }}" alt="teacher's face">
-      </div>
-      <h1 class="teacher-name">{{ teacher_name }}</h1>
-      <h1 class="teacher-type">{{ teacher_type_text }}</h1>
+  <div class="teacher-face-and-name">
+    <div class="img-container">
+      <img class="teacher-face" src="{{ teacher_photo }}" alt="teacher's face">
+    </div>
+    <h1 class="teacher-name">{{ teacher_name }}</h1>
+    <h1 class="teacher-type">{{ teacher_type_text }}</h1>
+  </div>
+
+  <div class="general-numbers">
+
+    <div class="graphs">
+
+      {% block graphs1 %}
+        <div>
+          <p class="mark-percent">{{ want_to_continue }}</p>
+          <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати</p>
+        </div>
+      {% endblock %}
+
     </div>
 
-    <div class="general-numbers">
+    <div class="graphs">
 
-      <div class="graphs">
-
-        {% block graphs1 %}
-          <div>
-            <p class="mark-percent">{{ want_to_continue }}</p>
-            <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати</p>
-          </div>
-        {% endblock %}
-
-      </div>
-
-      <div class="graphs">
-
-        {% block graphs2 %}
-          <div>
-            <p class="mark">{{ meaningfulness }}</p>
-            <p class="mark-description">Змістовність лекцій</p>
-          </div>
-          <div>
-            <p class="mark">{{ grading_system }}</p>
-            <p class="mark-description">Система оцінювання</p>
-          </div>
-        {% endblock %}
-
-      </div>
-
-      <div class="graphs">
-
+      {% block graphs2 %}
         <div>
-          <p class="mark">{{ cheating }}</p>
-          <p class="mark-description">Викладач не ставить бали без знань</p>
+          <p class="mark">{{ meaningfulness }}</p>
+          <p class="mark-description">Змістовність лекцій</p>
         </div>
         <div>
-          <p class="mark">{{ skills }}</p>
-          <p class="mark-description">Володіння матеріалом</p>
+          <p class="mark">{{ grading_system }}</p>
+          <p class="mark-description">Система оцінювання</p>
         </div>
+      {% endblock %}
 
+    </div>
+
+    <div class="graphs">
+
+      <div>
+        <p class="mark">{{ cheating }}</p>
+        <p class="mark-description">Викладач не ставить бали без знань</p>
+      </div>
+      <div>
+        <p class="mark">{{ skills }}</p>
+        <p class="mark-description">Володіння матеріалом</p>
       </div>
 
-      <div class="respondents-div">
+    </div>
 
+    <div class="graphs">
+      <div>
         {% block respondents %}
           <p class="respondents-count">5/4/42</p>
           <p class="respondents-count-description">кількість опитаних <br>
             (лектор/практик/лектор+практик)</p>
+          </div>
         {% endblock %}
 
-      </div>
     </div>
-  {% endblock %}
+  </div>
+{% endblock %}
 
-    {% block right %}
+{% block right %}
 
-    <div class="graphs graph-bars">
+  <div class="graphs graph-bars">
 
-      {% block graphs4 %}
-        <div class="graph-education">
-          <div class="helper-div">
-            <canvas class="graph" id="education-quality-lector"></canvas>
-          </div>
-          <p class="education-description">Задоволення викладанням дисципліни</p>
-        </div>
-      {% endblock %}
-
-
+    {% block graphs4 %}
       <div class="graph-education">
         <div class="helper-div">
-          <canvas class="graph" id="self-assesment"></canvas>
+          <canvas class="graph" id="education-quality-lector"></canvas>
         </div>
-        <p class="education-description">Самооцінка власних знань після проходження курсу</p>
+        <p class="education-description">Задоволення викладанням дисципліни</p>
       </div>
+    {% endblock %}
 
+
+    <div class="graph-education">
+      <div class="helper-div">
+        <canvas class="graph" id="self-assesment"></canvas>
+      </div>
+      <p class="education-description">Самооцінка власних знань після проходження курсу</p>
     </div>
+
+  </div>
 {% endblock %}
 
 {% block semestr %}
