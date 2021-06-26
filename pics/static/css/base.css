@@ -103,16 +103,19 @@
 }
 
 
-
+.respondents {
+    display: flex;
+    text-align: left;
+    justify-content: flex-start;
+    padding-left: 30px;
+}
 .respondents-count {
     font-weight: bold;
     font-size: 40px;
-    text-align: left;
 }
 
 .respondents-count-description {
     font-size: 24px;
-    text-align: left;
 }
 
 

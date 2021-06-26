@@ -16,7 +16,7 @@ export const styles = {
         fontColor: '#fee6ff',
         backdropColor: '#19081a',
     },
-    english: {
+    eng: {
         backgroundColor: '#56cc91b4',
         fontColor: '#e7fff3',
         backdropColor: '#081a0e',
