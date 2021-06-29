@@ -34,7 +34,7 @@ class Cathedra(models.Model):
 
     class Meta:
         verbose_name = "Кафедра"
-        verbose_name_plural = "Кафедри"
+        verbose_name_plural = "Кафедры"
 
 
 class Teacher(models.Model):
@@ -44,8 +44,8 @@ class Teacher(models.Model):
     is_eng = models.BooleanField('Это англ?', default=False)
 
     groups = models.ManyToManyField('Group', through='TeacherNGroup')
-    cathedras = models.ManyToManyField(Cathedra, related_name='teachers')
-    lessons = models.TextField("Шо ведет", null=True)
+    cathedras = models.ManyToManyField(Cathedra, related_name='teachers', blank=True)
+    lessons = models.TextField("Шо ведет", null=True, blank=True)
 
     @classmethod
     def add(cls, id_, name, type_, group):
