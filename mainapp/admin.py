@@ -45,7 +45,7 @@ class GroupAdmin(admin.ModelAdmin):
                 return f"{p[0]} {p[1][0]}. {p[2][0]}"
             except:
                 return t
-        teachers = obj.teachers.all().values_list('name', flat=True).distinct()
+        teachers = obj.teachers.all().values_list('name', flat=True).order_by('name').distinct()
         teachers = [shortify(t) for t in teachers]
         return '; '.join(teachers)
 
@@ -59,9 +59,8 @@ class GroupAdmin(admin.ModelAdmin):
     list_editable = ('faculty', )
     search_fields = ('name',)
     actions = ('export',)
-    inlines = [
-        TeacherInline,
-    ]
+    inlines = (TeacherInline, )
+    ordering = ('name',)
 
 
 @admin.register(Teacher)
@@ -88,6 +87,7 @@ class TeacherAdmin(admin.ModelAdmin):
     list_filter = ('groups__faculty', 'cathedras')
     search_fields = ('name',)
     inlines = (GroupInline, )
+    ordering = ('name', )
 
 
 # @admin.register(TeacherNGroup)
@@ -112,6 +112,7 @@ class CathedraAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     list_display = ('name', 'faculty')
     list_filter = ('faculty', )
+    ordering = ('name', )
 
 
 @admin.register(Question)
