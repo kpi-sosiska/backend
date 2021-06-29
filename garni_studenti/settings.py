@@ -25,10 +25,7 @@ INSTALLED_APPS = [
 ]
 
 
-# CACHALOT_ONLY_CACHABLE_TABLES = 1123
-# CACHALOT_ONLY_CACHABLE_TABLES = {
-#     'mainapp_teacher', 'mainapp_group', 'mainapp_teacherngroup', 'mainapp_faculty', 'mainapp_cathedra'
-# }
+CACHALOT_ONLY_CACHABLE_APPS = ['mainapp']
 
 
 MIDDLEWARE = [
