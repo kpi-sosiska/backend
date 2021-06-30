@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'mainapp',
     'botapp',
     # 'parserapp',
-    'cachalot',
+    # 'cachalot',
     'pics'
 ]
 
