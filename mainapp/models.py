@@ -25,18 +25,6 @@ class Faculty(models.Model):
         verbose_name_plural = "Факультеты"
 
 
-class Cathedra(models.Model):
-    name = models.CharField('Кафедра', max_length=10, null=True)
-    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
-
-    def __str__(self):
-        return f'{self.name} ({self.faculty.name})'
-
-    class Meta:
-        verbose_name = "Кафедра"
-        verbose_name_plural = "Кафедры"
-
-
 class Teacher(models.Model):
     id = models.CharField(max_length=36, primary_key=True)
     name = models.CharField('Имя', max_length=200)
@@ -44,7 +32,7 @@ class Teacher(models.Model):
     is_eng = models.BooleanField('Это англ?', default=False)
 
     groups = models.ManyToManyField('Group', through='TeacherNGroup')
-    cathedras = models.ManyToManyField(Cathedra, related_name='teachers', blank=True)
+    cathedras = models.TextField("Кафедры", null=True, blank=True)
     lessons = models.TextField("Шо ведет", null=True, blank=True)
 
     @classmethod

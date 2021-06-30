@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.http import HttpResponse, JsonResponse
 from django.utils.safestring import mark_safe
 
-from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, Cathedra
+from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty
 
 
 @admin.register(Locale)
@@ -73,18 +73,14 @@ class TeacherAdmin(admin.ModelAdmin):
     def faculties(self, obj):
         return list(Faculty.objects.filter(group__teachers__id=obj.id).distinct())
 
-    @admin.display(description='Кафедры')
-    def _cathedras(self, obj: Teacher):
-        return list(obj.cathedras.all().distinct())
-
     @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
 
     readonly_fields = ('rozklad_link',)
-    list_display = ('name', 'faculties', 'lessons', '_cathedras')
+    list_display = ('name', 'faculties', 'lessons', 'cathedras')
     list_editable = ('lessons',)
-    list_filter = ('groups__faculty', 'cathedras')
+    list_filter = ('groups__faculty', )
     search_fields = ('name',)
     inlines = (GroupInline, )
     ordering = ('name', )
@@ -105,14 +101,6 @@ class FacultyAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     list_display = ('name', 'poll_result_link')
     list_editable = ('poll_result_link',)
-
-
-@admin.register(Cathedra)
-class CathedraAdmin(admin.ModelAdmin):
-    readonly_fields = ('id',)
-    list_display = ('name', 'faculty')
-    list_filter = ('faculty', )
-    ordering = ('name', )
 
 
 @admin.register(Question)
