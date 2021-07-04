@@ -50,6 +50,7 @@ class GroupAdmin(admin.ModelAdmin):
         return '; '.join(teachers)
 
     class TeacherInline(admin.TabularInline):
+        autocomplete_fields = ('teacher',)
         model = TeacherNGroup
         extra = 1
 
@@ -66,8 +67,9 @@ class GroupAdmin(admin.ModelAdmin):
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     class GroupInline(admin.TabularInline):
+        autocomplete_fields = ('group', )
         model = TeacherNGroup
-        extra = 0
+        extra = 1
 
     @admin.display(description='Факультеты')
     def faculties(self, obj):
@@ -84,16 +86,6 @@ class TeacherAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     inlines = (GroupInline, )
     ordering = ('name', )
-
-
-# @admin.register(TeacherNGroup)
-# class TeacherNGroupAdmin(admin.ModelAdmin):
-#     @admin.display(description='Факультет')
-#     def faculty(self, obj):
-#         return obj.group.faculty
-#
-#     list_display = ('teacher', 'group', 'faculty', 'link')
-#     list_filter = ('group__faculty',)
 
 
 @admin.register(Faculty)
@@ -161,7 +153,6 @@ class ResultAdmin(admin.ModelAdmin):
         ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter),
         IsFinishedListFilter
     )
-    readonly_fields = ('time_start', 'time_finish')
-    raw_id_fields = ('teacher_n_group',)
+    readonly_fields = ('teacher_n_group', 'time_start', 'time_finish')
     actions = ('export',)
     inlines = (AnswerInline, )

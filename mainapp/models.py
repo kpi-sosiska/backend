@@ -163,6 +163,9 @@ class Result(models.Model):
                 ResultAnswers.objects.create(result=result, question_id=question_id,
                                              answer_1=answers[0], answer_2=answers[1])
 
+    def __str__(self):
+        return f"{self.teacher_n_group} {self.get_teacher_type_display()}"
+
     class Meta:
         unique_together = ('user_id', 'teacher_n_group')
         verbose_name = "Результат опроса"
