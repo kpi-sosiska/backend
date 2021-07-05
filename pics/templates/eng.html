@@ -16,7 +16,7 @@
 
 
 {% block respondents %}
-  <p class="respondents-count">5</p>
+  <p class="respondents-count">{{ responses|join:" / " }}</p>
   <p class="respondents-count-description">кількість опитаних</p>
 {% endblock %}
 

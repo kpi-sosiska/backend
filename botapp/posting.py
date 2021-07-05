@@ -1,9 +1,19 @@
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garni_studenti.settings')
+django.setup()
+
+from mainapp.models import Faculty, Teacher
+
+
 import asyncio
 from itertools import cycle
 
 from aiogram import types
 from aiogram.utils import executor
 from aiogram.utils.markdown import hlink
+from pyppeteer import launch
 
 from botapp.bot import dp, bot
 
@@ -20,17 +30,17 @@ async def make_new_post():
     # todo
 
 
-async def _send_new_post(faculty, teacher, img_link, comments):
-    msg = await _send_post(faculty, teacher, img_link)
+async def _send_new_post(faculty, teacher, img, comments):
+    msg = await _send_post(faculty, teacher, img)
     chat_id = await _chat_link_cache(faculty.poll_result_link)
 
     _comments_queue[(chat_id, msg.text)] = comments
 
 
-async def _send_post(faculty, teacher, img_link):
+async def _send_post(faculty, teacher, img):
     cathedras = ' '.join([
         f"#{cathedra}" for cathedra in
-        teacher.cathedras.filter(faculty=faculty).values_list('name')
+        teacher.cathedras.filter(faculty=faculty).values_list('name', flat=True)
     ])
     lessons = '\n'.join([
         f"{mark} {lesson};" for lesson, mark
@@ -40,7 +50,7 @@ async def _send_post(faculty, teacher, img_link):
 
     text = f"{cathedras} {type_} {hlink(teacher.name, 'http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v=' + teacher.id)}" \
            f"\n\n{lessons}"
-    return await bot.send_photo(faculty.poll_result_link, img_link, caption=text)
+    return await bot.send_photo(faculty.poll_result_link, img, caption=text)
 
 
 @dp.channel_post_handler()
@@ -61,17 +71,23 @@ async def _chat_link_cache(channel, cache={}):
     return cache[channel]
 
 
+async def _get_img():
+    browser = await launch()
+    page = await browser.newPage()
+    await page.setViewport(dict(width=1500, height=1500))
+    await page.goto('https://sova.kpi.in.ua/pic/')
+    img = await page.screenshot(type='png')
+    await browser.close()
+    return img
+
 if __name__ == '__main__':
-    import os
-    import django
-
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garni_studenti.settings')
-    django.setup()
-
-    from mainapp.models import Teacher
-
-    teacher = Teacher.objects.all()[0]
-    faculty = teacher.groups.all()[0].cathedra.faculty
+    faculty = Faculty.objects.get(id=10106)
     faculty.poll_result_link = -1001407513106
 
-    executor.start(dp, send_new_post(faculty, teacher, "https://bbriverboats.com/img/test/3840x2160.png", ["peq1", 'hui2']))
+    teacher = Teacher.objects.get(id='d1bfd5d9-efde-40af-992e-7f8e798a5f69')
+
+    async def test():
+        img = await _get_img()
+        await _send_new_post(faculty, teacher, img, ["peq1", 'hui2'])
+
+    executor.start(dp, test())
