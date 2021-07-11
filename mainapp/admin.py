@@ -88,7 +88,7 @@ class TeacherAdmin(admin.ModelAdmin):
     readonly_fields = ('rozklad_link',)
     list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img')
     list_editable = ('lessons',)
-    list_filter = ('groups__faculty', )
+    list_filter = ('groups__faculty', ("photo", admin.EmptyFieldListFilter))
     search_fields = ('name',)
     inlines = (GroupInline, )
     ordering = ('name', )
