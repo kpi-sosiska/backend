@@ -79,8 +79,14 @@ class TeacherAdmin(admin.ModelAdmin):
     def rozklad_link(self, obj):
         return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
 
+    @admin.display(description='Фото')
+    def photo_img(self, obj):
+        if not obj.photo:
+            return None
+        return mark_safe(f'<img src="{obj.photo}" width="50px">')
+
     readonly_fields = ('rozklad_link',)
-    list_display = ('name', 'faculties', 'lessons', 'cathedras')
+    list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img')
     list_editable = ('lessons',)
     list_filter = ('groups__faculty', )
     search_fields = ('name',)
