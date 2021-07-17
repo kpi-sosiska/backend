@@ -3,11 +3,12 @@ from random import choice
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser
+from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
+    University
 
 A_WORDS = ['Абажур', 'Абревіатура', 'Абзац', 'Абітурієнт', 'Абонемент', 'Абонент', 'Абордаж', 'Абориген', 'Абрикос', 'Абстрактний', 'Абстракція', 'Авангард', 'Авантюра', 'Аварія', 'Авіадесант', 'Авіакомпанія', 'Авиапочта', 'Авіапромисловість', 'Авіасалон', 'Австралія', 'Автобіографія', 'Автобус', 'Автогараж', 'Автограф', 'Автоколона', 'Автоматизація', 'Автомобіль', 'Автономний', 'Автопілот', 'Автор', 'Авторитет', 'Автострада', 'Агентство', 'Агрегат', 'Агроном', 'Адекватний', 'Адміністрація', 'Адмірал', 'Адреса', 'Ажіотаж', 'Азія', 'Айсберг', 'Академія', 'Акація', 'Акваланг', 'Аквалангіст', 'Аквамарин', 'Акварель', 'Акваріум', 'Акваторія', 'Акліматизація', 'Акомпанемент', 'Акомпаніатор', 'Акомпануватиме', 'Акорд', 'Акордеон', 'Акумулятор', 'Акуратно', 'Акуратний', 'Аксесуар', 'Активний', 'Актуальний', 'Акустика', 'Алгоритм', 'Алегорія', 'Алергія', 'Алея', 'Алігатор', 'Алітерація', 'Алмаз', 'Алмазний', 'Алфавіт', 'Альбатрос', 'Альбом', 'Альманах', 'Альпініст', 'Альтернатива', 'Альфа-промені', 'Алюмінієвий', 'Алюміній', 'Амбразура', 'Америка', 'Аморальний', 'Амплітуда', 'Амплуа', 'Амфітеатр', 'Аналітичний', 'Ананас', 'Анафора', 'Анахронізм', 'Анекдот', 'Аннали', 'Анотація', 'Анулювати', 'Аномальний', 'Ансамбль', 'Антагонізм', 'Антарктида', 'Антенна', 'Антициклон', 'Антологія', 'Апельсин', 'Аплодувати', 'Апогей', 'Аполітичний', 'Апостол', 'Апофеоз', 'Апарат', 'Апаратура', 'Апендицит', 'Апетит', 'Аплікація', 'Аптека', 'Аргумент', 'Арена', 'Аристократ', 'Аритмія', 'Арматура', 'Аромат', 'Арсенал', 'Артеміда', 'Артикуляція', 'Артилерія', 'Артист', 'Артистка', 'Архаїзм', 'Архаїчний', 'Архів', 'Архітектура', 'Асесор', 'Асесор', 'Асиметрія', 'Асамблея', 'Асиміляція', 'Асистент', 'Асортимент', 'Асоціація', 'Астронавт', 'Асфальт', 'Атака', 'Атласний', 'Атлет', 'Атмосфера', 'Атестат', 'Атракціон', 'Аудиторія', 'Афіша', 'Африка']
 
@@ -15,18 +16,27 @@ admin.site.site_header = lambda: "Студентский Освітній Вик
 admin.site.site_title = "СОВА"
 
 
+class ModelAdminByUniver(admin.ModelAdmin):
+    univer_field_path = None
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if self.univer_field_path and request.user.univer:
+            queryset = queryset.filter(**{self.univer_field_path: request.user.univer})
+        return queryset
+
+
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password', 'univer')}),
-        (_('Permissions'), {
-            'fields': ('is_superuser', 'groups', 'user_permissions'),
-        }),
+        (_('Permissions'), {'fields': ('is_superuser', 'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'univer')
+    list_display = ('username', 'univer', 'is_superuser')
     list_filter = ('univer', )
     search_fields = ('username', 'univer')
+    ordering = ('-is_superuser', 'univer')
 
 
 @admin.register(Locale)
@@ -37,7 +47,7 @@ class LocaleAdmin(admin.ModelAdmin):
 
 
 @admin.register(Group)
-class GroupAdmin(admin.ModelAdmin):
+class GroupAdmin(ModelAdminByUniver):
     def export(self, request, queryset):
         fac2group = defaultdict(list)
         for group in queryset:
@@ -74,10 +84,11 @@ class GroupAdmin(admin.ModelAdmin):
         model = TeacherNGroup
         extra = 1
 
+    univer_field_path = "faculty__univer"
     readonly_fields = ('rozklad_link', 'link')
+    autocomplete_fields = ('faculty',)
     list_display = ('name', 'faculty', 'teacher_list')
-    list_filter = ('faculty', )
-    list_editable = ('faculty', )
+    list_filter = ('faculty', 'faculty__univer')
     search_fields = ('name',)
     actions = ('export',)
     inlines = (TeacherInline, )
@@ -85,7 +96,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 
 @admin.register(Teacher)
-class TeacherAdmin(admin.ModelAdmin):
+class TeacherAdmin(ModelAdminByUniver):
     class GroupInline(admin.TabularInline):
         autocomplete_fields = ('group', )
         model = TeacherNGroup
@@ -105,20 +116,28 @@ class TeacherAdmin(admin.ModelAdmin):
             return None
         return mark_safe(f'<img src="{obj.photo}" width="50px">')
 
+    univer_field_path = "univer"
     readonly_fields = ('rozklad_link',)
     list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img')
     list_editable = ('lessons',)
-    list_filter = ('groups__faculty', ("photo", admin.EmptyFieldListFilter))
+    list_filter = ('groups__faculty', 'univer', ("photo", admin.EmptyFieldListFilter))
     search_fields = ('name',)
     inlines = (GroupInline, )
     ordering = ('name', )
 
 
+@admin.register(University)
+class UniversityAdmin(admin.ModelAdmin):
+    list_display = ('name', )
+
+
 @admin.register(Faculty)
-class FacultyAdmin(admin.ModelAdmin):
-    readonly_fields = ('id',)
-    list_display = ('name', 'poll_result_link')
+class FacultyAdmin(ModelAdminByUniver):
+    univer_field_path = "univer"
+    search_fields = ('name', )
+    list_display = ('name', 'univer', 'poll_result_link')
     list_editable = ('poll_result_link',)
+    list_filter = ('univer', )
 
 
 @admin.register(Question)
@@ -155,20 +174,6 @@ class ResultAdmin(admin.ModelAdmin):
     def group(self, obj):
         return obj.teacher_n_group.group
 
-    def export(self, request, queryset):
-        data = [
-            dict(
-                teacher_name=(res.teacher_n_group.teacher.name_position or res.teacher_n_group.teacher.name) +
-                             (' ENG' if res.teacher_n_group.teacher.is_eng else ''),
-                teacher_type=res.teacher_type,
-                group_name=res.teacher_n_group.group.name,
-                open_question_answer=res.open_question_answer,
-                answers=list(res.resultanswers_set.values('question__question_text', 'answer_1', 'answer_2'))
-            )
-            for res in queryset
-        ]
-        return JsonResponse(data, safe=False)
-
     @admin.display(description='Закончил опрос', boolean=True)
     def is_finished(self, obj):
         return obj.time_finish is not None
@@ -180,5 +185,4 @@ class ResultAdmin(admin.ModelAdmin):
         IsFinishedListFilter
     )
     readonly_fields = ('teacher_n_group', 'time_start', 'time_finish')
-    actions = ('export',)
     inlines = (AnswerInline, )

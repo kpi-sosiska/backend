@@ -2,7 +2,7 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from mainapp.models.groups import TEACHER_TYPE, TeacherNGroup
+from mainapp.models.teachers import TEACHER_TYPE, TeacherNGroup
 
 
 class Question(models.Model):

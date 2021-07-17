@@ -11,7 +11,7 @@ TEACHER_TYPE = {
 
 
 class University(models.Model):
-    name = models.CharField('Универ', max_length=10)
+    name = models.CharField('Короткое название', max_length=10)
 
     def __str__(self):
         return self.name
@@ -23,7 +23,7 @@ class University(models.Model):
 
 class Faculty(models.Model):
     name = models.CharField('Факультет', max_length=10, null=True)
-    # univer = models.ForeignKey(University, models.CASCADE, verbose_name='Универ')
+    univer = models.ForeignKey(University, models.CASCADE, verbose_name='Универ')
     poll_result_link = models.CharField('Ссылка на результаты опроса', max_length=100, null=True)
 
     def __str__(self):
@@ -67,7 +67,7 @@ class Teacher(models.Model):
     photo = models.CharField('Ссылка на фото', max_length=500, null=True, blank=True)
     is_eng = models.BooleanField('Это англ?', default=False)
 
-    # univer = models.ForeignKey(University, models.CASCADE, verbose_name='Универ')
+    univer = models.ForeignKey(University, models.CASCADE, verbose_name='Универ')
 
     groups = models.ManyToManyField(Group, through='TeacherNGroup')
     cathedras = models.TextField("Кафедры", null=True, blank=True)
@@ -79,7 +79,6 @@ class Teacher(models.Model):
     class Meta:
         verbose_name = "Препод"
         verbose_name_plural = "Преподы"
-
 
 
 class TeacherNGroup(models.Model):
