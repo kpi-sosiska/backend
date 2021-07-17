@@ -9,18 +9,18 @@ DEBUG = getenv("ADMIN") != "PROD"
 
 ALLOWED_HOSTS = ['*']
 
-
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mainapp.apps.MyAdminConfig',  # instead of 'django.contrib.admin'
     'mainapp',
     'botapp',
     'pics'
 ]
+
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
