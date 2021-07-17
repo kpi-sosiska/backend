@@ -19,13 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mainapp',
     'botapp',
-    # 'cachalot',
     'pics'
 ]
-
-
-CACHALOT_ONLY_CACHABLE_APPS = ['mainapp']
-
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -77,6 +72,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
-STATICFILES_DIRS = [
+STATICFILES_DIRS = []
 
-]
+AUTH_USER_MODEL = 'mainapp.customuser'
