@@ -74,4 +74,6 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = []
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 AUTH_USER_MODEL = 'mainapp.customuser'
