@@ -90,7 +90,7 @@ class TeacherNGroup(models.Model):
 
     def link(self):
         from botapp.utils import encode_start_teacher
-        return encode_start_teacher(self.teacher_id, self.group_id)
+        return encode_start_teacher(self.id)
 
     class Meta:
         unique_together = ('teacher', 'group')

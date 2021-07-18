@@ -1,11 +1,9 @@
 import json
-import logging
-import uuid
-from base64 import urlsafe_b64decode, urlsafe_b64encode
 from hashlib import md5
 
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
+from aiogram.utils import deep_linking
 from aiogram.utils.markdown import hlink
 from mainapp.models import Locale as L
 
@@ -32,46 +30,34 @@ def question_keyboard(question, teacher_type, answers=(None, None)):
     ])
 
 
-def teachers_links(teachers, group_id):
+def teachers_links(tngs):
     return '\n'.join([
-        '• ' + hlink(t.name, encode_start_teacher(t.id, group_id))
-        for t in teachers
+        '• ' + hlink(tng.teacher.name, encode_start_teacher(tng))
+        for tng in tngs
     ])
 
 
-def encode_start_teacher(teacher_id, group_id):
-    return _encode_deep_link('t', teacher_id, group_id)
+def encode_start_teacher(techer_n_group):
+    return _encode_deep_link('t', techer_n_group.id)
 
 
 def encode_start_group(group_id):
     return _encode_deep_link('g', group_id)
 
 
-# deeplink payload max is 64 bytes
-# cmd + | + uuid + | + uuid = 1 + 1 + 36 + 1 + 36 bytes = дохуя
-# so use bytes
-
-
 def _encode_deep_link(*args):
-    type_, *uuids = args
-    payload = b"".join([type_.encode('utf-8')] + [uuid.UUID(u).bytes for u in uuids])
-    payload = urlsafe_b64encode(payload).decode().replace("=", "")
+    payload = '|'.join(map(str, args))
+    payload = deep_linking.encode_payload(payload)
     return f"t.me/{L['bot_username']}?start={payload}"
 
 
-def decode_deep_link(payload_text):
-    payload_text += "=" * (4 - len(payload_text) % 4)
+def decode_deep_link(payload):
     try:
-        payload = urlsafe_b64decode(payload_text)
-        type_, *uuids = payload
-        uuids = [
-            str(uuid.UUID(bytes=bytes(uuids[i:i + 16])))
-            for i in range(0, len(uuids), 16)
-        ]
-        return bytes([type_]).decode(), uuids
+        payload = deep_linking.decode_payload(payload)
     except Exception:
-        logging.exception("wrong payload" + payload_text)
-        return None, []
+        return None, None
+    args = payload.split('|')
+    return args
 
 
 class DeepLinkFilter(BoundFilter):

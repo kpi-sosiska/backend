@@ -9,17 +9,16 @@ from .bot import dp
 
 
 @dp.message_handler(commands=['start'], state='*', deep_link='g')
-async def start_group(message: types.Message, payload: Tuple[str]):
-    group_id = payload[0]
+async def start_group(message: types.Message, payload: str):
     try:
-        group = models.Group.objects.get(id=group_id)
+        group = models.Group.objects.get(id=payload)
     except models.Group.DoesNotExist:
         return await message.answer(L['wrong_link'])
 
     teachers = group.teacher_need_votes()
-    teachers = teachers_links(teachers, group.id)
     text = L['group_teachers_text'].format(group_name=group.name.upper(),
-                                           results_link=group.faculty.poll_result_link, teachers=teachers)
+                                           results_link=group.faculty.poll_result_link,
+                                           teachers=teachers_links(teachers))
     await message.reply(text)
 
 

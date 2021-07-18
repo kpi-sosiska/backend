@@ -1,7 +1,6 @@
 import asyncio
 import json
 from contextlib import suppress
-from typing import Tuple
 
 from aiogram import types, exceptions
 from aiogram.dispatcher import FSMContext
@@ -35,10 +34,9 @@ data:
 
 
 @dp.message_handler(commands=['start'], state='*', deep_link='t')
-async def start_poll(message: types.Message, state: FSMContext, payload: Tuple[str, str]):
-    teacher_id, group_id = payload
+async def start_poll(message: types.Message, state: FSMContext, payload: str):
     try:
-        teacher_n_group = models.TeacherNGroup.objects.get(teacher_id=teacher_id, group_id=group_id)
+        teacher_n_group = models.TeacherNGroup.objects.get(id=payload)
     except (ValueError, models.TeacherNGroup.DoesNotExist):
         return await message.answer(L['wrong_link'])
 
@@ -171,12 +169,11 @@ async def other_teachers_in_group(message: types.Message, state: FSMContext):
 
     # преподы которых еще нужно пройти отсортированные по кол-ву прохождений
     teachers = group.teacher_need_votes(). \
-        exclude(teacherngroup__result__user_id=hash_(message.from_user.id),
-                teacherngroup__result__time_finish__isnull=False)
+        exclude(result__user_id=hash_(message.from_user.id), result__time_finish__isnull=False)
 
     if teachers:
-        teachers = teachers_links(teachers, group.id)
-        text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(), teachers=teachers)
+        text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(),
+                                                        teachers=teachers_links(teachers))
         await message.answer(text)
 
 
