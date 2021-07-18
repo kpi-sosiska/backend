@@ -44,36 +44,29 @@ class Result(models.Model):
 
     open_question_answer = models.TextField('Ответ свободного микрофона', null=True, blank=True)
 
+    is_active = models.BooleanField("Актуальный результат", default=False,
+                                    help_text="Последний законченный результат этого юзера по этому преподу")
     time_start = models.DateTimeField('Время начала прохождения', auto_now_add=True)
     time_finish = models.DateTimeField('Время окончания прохождения', null=True, default=None)
 
-    @classmethod
-    def filter_finished(cls):
-        return cls.objects.filter(time_finish__isnull=False)
-
-    @classmethod
-    def add(cls, user_id, teacher_n_group, teacher_type, open_question_answer, other_answers):
+    def finish(self, teacher_type, open_question_answer, other_answers):
         with transaction.atomic():
-            result, _ = cls.objects.update_or_create(
-                user_id=user_id, teacher_n_group=teacher_n_group,
-                defaults=dict(
-                    time_finish=timezone.now(),
-                    teacher_type=teacher_type,
-                    open_question_answer=open_question_answer
-                ))
+            self.teacher_type = teacher_type
+            self.open_question_answer = open_question_answer
+            self.is_active = True
+            self.time_finish = timezone.now()
+            self.save()
 
-            ResultAnswers.objects.filter(result=result).delete()  # удалить старые результаты (если это перепрохождение)
             for question_id, answers in other_answers.items():
                 if len(answers) == 1:
                     answers.append(None)
-                ResultAnswers.objects.create(result=result, question_id=question_id,
+                ResultAnswers.objects.create(result=self, question_id=question_id,
                                              answer_1=answers[0], answer_2=answers[1])
 
     def __str__(self):
         return f"{self.teacher_n_group} {self.get_teacher_type_display()}"
 
     class Meta:
-        unique_together = ('user_id', 'teacher_n_group')
         verbose_name = "Результат опроса"
         verbose_name_plural = "Результаты опроса"
 

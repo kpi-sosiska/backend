@@ -21,21 +21,6 @@ class RelatedFieldListFilterByUniver(admin.RelatedFieldListFilter):
         return field.get_choices(include_blank=False, ordering=ordering, limit_choices_to=limit)
 
 
-class IsFinishedListFilter(admin.SimpleListFilter):
-    title = 'Закончил опрос'
-    parameter_name = 'is_finished'
-
-    def lookups(self, request, model_admin):
-        return (('1', 'Закончил опрос'),
-                ('0', 'Не закончил опрос'))
-
-    def queryset(self, request, queryset):
-        if self.value() is None:
-            return queryset
-        is_finished = int(self.value() or 0)
-        return queryset.filter(time_finish__isnull=not is_finished)
-
-
 @admin.action(description='Получить ссылки на прохождение опроса')
 def export_groups(model_admin, request, queryset):
     fac2group = defaultdict(list)

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from contextlib import suppress
 
 from aiogram import types, exceptions
@@ -23,13 +24,17 @@ class PollStates(StatesGroup):
 
 """
 data:
-    teacher_n_group = teacher
-    teacher_type = ...
-    q2a = dict(
-        question_id: None
-        question_id: user answer
+    teacher_n_group: int = teacher_n_group.id
+    result: int = models.Result object
+    
+    teacher_type: str = one of models.TEACHER_TYPE
+    open_question: str = open question user answer 
+    
+    q2a = dict(                # question_id: List[Optional[int]]
+        question_1: [4, 5]     # 2 questions, 2 answers
+        question_4: [1, None]  # 2 questions, 1 answers
+        question_3: [None]     # 1 questions, 0 answers
     )
-    open_q = user answ
 """
 
 
@@ -40,7 +45,7 @@ async def start_poll(message: types.Message, state: FSMContext, payload: str):
     except (ValueError, models.TeacherNGroup.DoesNotExist):
         return await message.answer(L['wrong_link'])
 
-    await state.set_data(dict(teacher_n_group=teacher_n_group))
+    await state.set_data(dict(teacher_n_group=payload))
 
     # если у челика есть прохождения опроса с других групп то предупреждаем
     if await two_group_one_user(message, state):
@@ -55,17 +60,18 @@ async def start_poll(message: types.Message, state: FSMContext, payload: str):
 
 async def start_teacher(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        teacher = data['teacher_n_group'].teacher
+        tng = models.TeacherNGroup.objects.get(id=data['teacher_n_group'])
+        result = models.Result(user_id=hash_(message.from_user.id), teacher_n_group=tng)
+        result.save()  # save result now to have time_start and id
+        data['result'] = result.id
 
-    # save poll started
-    models.Result(user_id=hash_(message.from_user.id), teacher_n_group=data['teacher_n_group']).save()
+        await message.answer(hide_link(tng.teacher.photo) + L['teacher_text'].format(teacher=tng.teacher))
 
-    await message.answer(hide_link(teacher.photo) + L['teacher_text'].format(teacher=teacher))
-    if teacher.is_eng:
-        await state.update_data(teacher_type='ENG')
-        await questions_start(message, state)
-    else:
-        await teacher_type_start(message)
+        if tng.teacher.is_eng:
+            data['result'].teacher_type = 'ENG'
+            await questions_start(message, state)
+        else:
+            await teacher_type_start(message)
 
 
 async def teacher_type_start(message: types.Message):
@@ -83,8 +89,9 @@ async def teacher_type_query_handler(query: types.CallbackQuery, state: FSMConte
     if type_ not in list(models.TEACHER_TYPE.keys())[:-1]:
         return await query.answer("?")
 
-    await query.answer()
     await state.update_data(teacher_type=type_)
+
+    await query.answer()
     await query.message.edit_text(L['teacher_type_chosen'].format(type=L[f'teacher_type_{type_}']))
     await questions_start(query.message, state)
 
@@ -100,6 +107,7 @@ async def questions_start(message: types.Message, state: FSMContext):
                 return
             except exceptions.RetryAfter as ex:
                 await asyncio.sleep(ex.timeout + 1)
+        return await message.answer(L['result_save_error'])  # if can't send message in 5 attempts
 
     async with state.proxy() as data:
         teacher_type = data['teacher_type']
@@ -139,37 +147,39 @@ async def open_question_start(message: types.Message):
 async def open_question_query_handler(message: types.Message, state: FSMContext):
     if message.text in ('/skip', '/confirm'):
         if message.text == '/skip':
-            await state.update_data(open_q=None)
+            await state.update_data(open_question=None)
+
         await save_to_db(message, state)
-        await other_teachers_in_group(message, state)
+        await send_other_teachers_in_group(message, state)
         await state.finish()
     else:
-        await state.update_data(open_q=message.text)
+        await state.update_data(open_question=message.text)
         await message.answer(L['confirm_open_question_text'])
 
 
 async def save_to_db(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        try:
-            models.Result.add(hash_(message.from_user.id), data['teacher_n_group'],
-                              data['teacher_type'], data['open_q'], data['q2a'])
-        except Exception:
-            await message.answer(L['result_save_error'], reply_markup=types.ReplyKeyboardRemove())
-            raise
-        else:
-            await message.answer(L['result_save_success'], reply_markup=types.ReplyKeyboardRemove())
+    data = await state.get_data()
+    try:
+        models.Result.objects.get(id=data['result']).finish(
+            teacher_type=data['teacher_type'],
+            open_question_answer=data['open_question'],
+            other_answers=data['q2a'])
+    except Exception:
+        await message.answer(L['result_save_error'], reply_markup=types.ReplyKeyboardRemove())
+        logging.exception("Failed to save")
+    else:
+        await message.answer(L['result_save_success'], reply_markup=types.ReplyKeyboardRemove())
 
 
 #
 
 
-async def other_teachers_in_group(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        group = data['teacher_n_group'].group
+async def send_other_teachers_in_group(message: types.Message, state: FSMContext):
+    group = models.TeacherNGroup.objects.get(id=(await state.get_data())['teacher_n_group']).group
 
     # преподы которых еще нужно пройти отсортированные по кол-ву прохождений
     teachers = group.teacher_need_votes(). \
-        exclude(result__user_id=hash_(message.from_user.id), result__time_finish__isnull=False)
+        exclude(result__user_id=hash_(message.from_user.id), result__is_active=True)
 
     if teachers:
         text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(),
@@ -184,22 +194,16 @@ KEYBOARD_2G1U = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(L['b
 
 
 async def two_group_one_user(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        teacher_n_group = data['teacher_n_group']
-
-    results_from_other_group = models.Result.filter_finished().filter(user_id=hash_(message.from_user.id)) \
-        .exclude(teacher_n_group__group=teacher_n_group.group)
-
+    tng = models.TeacherNGroup.objects.get(id=(await state.get_data())['teacher_n_group'])
+    results_from_other_group = _2g1u_results(message.from_user.id, tng)
     if not results_from_other_group:
         return False
 
-    cur_group = teacher_n_group.group.name.upper()
+    cur_group = tng.group.name.upper()
     other_group = results_from_other_group[0].teacher_n_group.group.name.upper()
+    await message.answer(L['two_group_one_user'].format(other_group=other_group, cur_group=cur_group),
+                         reply_markup=KEYBOARD_2G1U)
 
-    await message.answer(
-        L['two_group_one_user'].format(other_group=other_group, cur_group=cur_group),
-        reply_markup=KEYBOARD_2G1U
-    )
     await PollStates.two_group_one_user.set()
     return True
 
@@ -210,9 +214,14 @@ async def two_group_one_user_handler(query: types.CallbackQuery, state: FSMConte
     if query.data != 'reset':
         return
 
-    async with state.proxy() as data:
-        teacher_n_group = data['teacher_n_group']
-    models.Result.objects.filter(user_id=hash_(query.from_user.id)) \
-        .exclude(teacher_n_group__group=teacher_n_group.group).delete()
+    tng = models.TeacherNGroup.objects.get(id=(await state.get_data())['teacher_n_group'])
+    _2g1u_results(query.from_user.id, tng).update(is_active=False)
+
     await query.message.edit_reply_markup()
     await start_teacher(query.message, state)
+
+
+def _2g1u_results(user_id, tng):
+    return models.Result.objects \
+        .filter(is_active=True, user_id=hash_(user_id)) \
+        .exclude(teacher_n_group__group=tng.group).update(is_active=False)

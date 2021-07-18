@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, IsFinishedListFilter, export_groups, short_fio
+from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, export_groups, short_fio
 from mainapp.models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
     University
 
@@ -131,15 +131,11 @@ class ResultAdmin(admin.ModelAdmin):
     def group(self, obj):
         return obj.teacher_n_group.group
 
-    @admin.display(description='Закончил опрос', boolean=True)
-    def is_finished(self, obj):
-        return obj.time_finish is not None
-
-    list_display = ('user_id', 'teacher', 'group', 'teacher_type', 'is_finished')
+    list_display = ('user_id', 'teacher', 'group', 'teacher_type', 'is_active')
     list_filter = (
+        'is_active',
         ('teacher_n_group__teacher', admin.RelatedOnlyFieldListFilter),
         ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter),
-        IsFinishedListFilter
     )
     readonly_fields = ('teacher_n_group', 'time_start', 'time_finish')
     inlines = (AnswerInline, )

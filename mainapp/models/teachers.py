@@ -41,8 +41,8 @@ class Group(models.Model):
     teachers = models.ManyToManyField('Teacher', through='TeacherNGroup')
 
     def teacher_need_votes(self):
-        return self.teachers.all().annotate(
-            results_cnt=Count('teacherngroup__result', filter=Q(teacherngroup__result__time_finish__isnull=False))
+        return self.teacherngroup_set.all().annotate(
+            results_cnt=Count('result', filter=Q(result__is_active=True))
         ).order_by('results_cnt')
 
     @classmethod
