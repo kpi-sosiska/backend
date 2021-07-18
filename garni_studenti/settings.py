@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mainapp.apps.MyAdminConfig',  # instead of 'django.contrib.admin'
+    'mainapp.admin.MyAdminConfig',  # instead of 'django.contrib.admin'
     'mainapp',
     'botapp',
     'pics'

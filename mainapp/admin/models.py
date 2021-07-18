@@ -1,23 +1,11 @@
-from collections import defaultdict
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
+from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, IsFinishedListFilter, export_groups, short_fio
+from mainapp.models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
     University
-
-
-class ModelAdminByUniver(admin.ModelAdmin):
-    univer_field_path = None
-
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        if self.univer_field_path and request.user.univer:
-            queryset = queryset.filter(**{self.univer_field_path: request.user.univer})
-        return queryset
 
 
 @admin.register(CustomUser)
@@ -42,18 +30,7 @@ class LocaleAdmin(admin.ModelAdmin):
 
 @admin.register(Group)
 class GroupAdmin(ModelAdminByUniver):
-    def export(self, request, queryset):
-        fac2group = defaultdict(list)
-        for group in queryset:
-            fac2group[group.faculty.name].append(group)
-        text = "\n".join([
-            f"{fac: ^30}\n" + '\n'.join([
-                f"{group.name: <20} {group.link()}"
-                for group in groups
-            ])
-            for fac, groups in fac2group.items()
-        ])
-        return HttpResponse(f"<pre>{text}</pre>")
+    # todo override get_preserved_filters to set faculty from req.user
 
     @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
@@ -61,17 +38,8 @@ class GroupAdmin(ModelAdminByUniver):
 
     @admin.display(description='Преподы')
     def teacher_list(self, obj):
-        def shortify(t):
-            if '.' in t:
-                return t
-            try:
-                p = t.split(' ')
-                return f"{p[0]} {p[1][0]}. {p[2][0]}"
-            except:
-                return t
         teachers = obj.teachers.all().values_list('name', flat=True).order_by('name').distinct()
-        teachers = [shortify(t) for t in teachers]
-        return '; '.join(teachers)
+        return '; '.join([short_fio(t) for t in teachers])
 
     class TeacherInline(admin.TabularInline):
         autocomplete_fields = ('teacher',)
@@ -82,9 +50,12 @@ class GroupAdmin(ModelAdminByUniver):
     readonly_fields = ('rozklad_link', 'link')
     autocomplete_fields = ('faculty',)
     list_display = ('name', 'faculty', 'teacher_list')
-    list_filter = ('faculty', 'faculty__univer')
+    list_filter = (
+        ('faculty', RelatedFieldListFilterByUniver),
+        ('faculty__univer', admin.RelatedOnlyFieldListFilter),
+    )
     search_fields = ('name',)
-    actions = ('export',)
+    actions = (export_groups, )
     inlines = (TeacherInline, )
     ordering = ('name',)
 
@@ -106,15 +77,17 @@ class TeacherAdmin(ModelAdminByUniver):
 
     @admin.display(description='Фото')
     def photo_img(self, obj):
-        if not obj.photo:
-            return None
-        return mark_safe(f'<img src="{obj.photo}" width="50px">')
+        return mark_safe(f'<img src="{obj.photo}" width="50px">') if obj.photo else None
 
     univer_field_path = "univer"
     readonly_fields = ('rozklad_link',)
     list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img')
     list_editable = ('lessons',)
-    list_filter = ('groups__faculty', 'univer', ("photo", admin.EmptyFieldListFilter))
+    list_filter = (
+        ('groups__faculty', RelatedFieldListFilterByUniver),
+        ('univer', admin.RelatedOnlyFieldListFilter),
+        ("photo", admin.EmptyFieldListFilter)
+    )
     search_fields = ('name',)
     inlines = (GroupInline, )
     ordering = ('name', )
@@ -145,20 +118,6 @@ class ResultAdmin(admin.ModelAdmin):
     class AnswerInline(admin.TabularInline):
         model = ResultAnswers
         extra = 0
-
-    class IsFinishedListFilter(admin.SimpleListFilter):
-        title = 'Закончил опрос'
-        parameter_name = 'is_finished'
-
-        def lookups(self, request, model_admin):
-            return (('1', 'Закончил опрос'),
-                    ('0', 'Не закончил опрос'))
-
-        def queryset(self, request, queryset):
-            if self.value() is None:
-                return queryset
-            is_finished = int(self.value() or 0)
-            return queryset.filter(time_finish__isnull=not is_finished)
 
     @admin.display(description='Препод')
     def teacher(self, obj):
