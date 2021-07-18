@@ -38,7 +38,8 @@ class GroupAdmin(ModelAdminByUniver):
 
     @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
-        return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g={obj.id}">{obj.id}</a>')
+        if obj.faculty.univer_id == 1:
+            return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g={obj.id}">{obj.id}</a>')
 
     @admin.display(description='Преподы')
     def teacher_list(self, obj):
@@ -77,11 +78,13 @@ class TeacherAdmin(ModelAdminByUniver):
 
     @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
-        return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
+        if obj.faculty.univer_id == 1:
+            return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
 
     @admin.display(description='Фото')
     def photo_img(self, obj):
-        return mark_safe(f'<img src="{obj.photo}" width="50px">') if obj.photo else None
+        if obj.photo:
+            return mark_safe(f'<img src="{obj.photo}" width="50px">')
 
     univer_field_path = "univer"
     readonly_fields = ('rozklad_link',)
