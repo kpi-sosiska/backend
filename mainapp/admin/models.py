@@ -15,6 +15,10 @@ class CustomUserAdmin(UserAdmin):
         (_('Permissions'), {'fields': ('is_superuser', 'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
+    add_fieldsets = ((None, {
+        'classes': ('wide',),
+        'fields': ('username', 'password1', 'password2', 'univer'),
+    }),)
     list_display = ('username', 'univer', 'is_superuser')
     list_filter = ('univer', )
     search_fields = ('username', 'univer')
