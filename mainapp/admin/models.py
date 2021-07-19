@@ -101,6 +101,7 @@ class TeacherAdmin(ModelAdminByUniver):
     search_fields = ('name',)
     inlines = (GroupInline, )
     ordering = ('name', )
+    formfield_overrides = {models.TextField: {'widget': Textarea(attrs={'wrap': 'off', 'rows': 4})}}
 
 
 @admin.register(University)
