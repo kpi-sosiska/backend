@@ -51,8 +51,8 @@ async def start_poll(message: types.Message, state: FSMContext, payload: str):
     if await two_group_one_user(message, state):
         return
 
-    if models.Result.filter_finished().filter(user_id=hash_(message.from_user.id),
-                                              teacher_n_group=teacher_n_group).count():
+    if models.Result.objects.filter(is_active=True, user_id=hash_(message.from_user.id),
+                                    teacher_n_group=teacher_n_group).exists():
         await message.answer(L['same_teacher_again'])
 
     await start_teacher(message, state)
@@ -116,21 +116,21 @@ async def questions_start(message: types.Message, state: FSMContext):
         questions = models.Question.get_by_type(teacher_type)
         for question in questions:
             await _send_msg(question)
-            data['q2a'][question.id] = [None] * (2 if question.need_two_answers(teacher_type) else 1)
+            data['q2a'][question.name] = [None] * (2 if question.need_two_answers(teacher_type) else 1)
 
     await PollStates.questions.set()
 
 
 @dp.callback_query_handler(state=PollStates.questions)
 async def questions_handler(query: types.CallbackQuery, state: FSMContext):
-    question_id, row_n, answer = json.loads(query.data)
+    question, row_n, answer = json.loads(query.data)
     await query.answer()
 
     async with state.proxy() as data:
-        data['q2a'][question_id][row_n] = answer
+        data['q2a'][question][row_n] = answer
 
-    keyboard = question_keyboard(models.Question.objects.get(id=question_id),
-                                 teacher_type=data['teacher_type'], answers=data['q2a'][question_id])
+    keyboard = question_keyboard(models.Question.objects.get(name=question),
+                                 teacher_type=data['teacher_type'], answers=data['q2a'][question])
     with suppress(exceptions.MessageNotModified):
         await query.message.edit_reply_markup(keyboard)
 

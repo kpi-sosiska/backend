@@ -4,3 +4,4 @@ aiohttp
 django-cachalot
 gunicorn
 pyppeteer
+django-admin-sortable2

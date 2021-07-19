@@ -2,10 +2,13 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from mainapp.models.teachers import TEACHER_TYPE, TeacherNGroup
+from mainapp.models.teachers import Faculty, TEACHER_TYPE, Teacher, TeacherNGroup
 
 
 class Question(models.Model):
+    name = models.CharField('Название', max_length=20, primary_key=True)
+    order = models.PositiveIntegerField('№', default=0, blank=False, null=False)
+
     question_text = models.TextField('Вопрос')
     answer_tip = models.TextField('Примечания', blank=True, null=True)
 
@@ -33,6 +36,7 @@ class Question(models.Model):
         return teacher_type == 'LECTOR_PRACTIC' and self.is_for_lec and self.is_for_pra and self.is_two_answers
 
     class Meta:
+        ordering = ['order']
         verbose_name = "Вопрос"
         verbose_name_plural = "Вопросы"
 
@@ -43,6 +47,7 @@ class Result(models.Model):
     teacher_type = models.CharField('Тип опросника', max_length=20, null=True, choices=TEACHER_TYPE.items())
 
     open_question_answer = models.TextField('Ответ свободного микрофона', null=True, blank=True)
+    open_answer_moderate = models.BooleanField('Комментарий допущен?', null=True)
 
     is_active = models.BooleanField("Актуальный результат", default=False,
                                     help_text="Последний законченный результат этого юзера по этому преподу")
@@ -72,10 +77,17 @@ class Result(models.Model):
 
 
 class ResultAnswers(models.Model):
-    result = models.ForeignKey(Result, models.CASCADE)
+    result = models.ForeignKey(Result, models.CASCADE, related_name='answers')
     question = models.ForeignKey(Question, models.CASCADE, verbose_name='Вопрос')
     answer_1 = models.PositiveSmallIntegerField('Ответ')
     answer_2 = models.PositiveSmallIntegerField('Еще ответ', null=True, blank=True)
+
+    def get_answers(self):
+        lec, prac = self.question.name, self.question.name + '_p'
+        if self.result.teacher_type == 'PRACTIC' and self.question.is_two_answers:
+            return {prac: self.answer_1}
+        res = {lec: self.answer_1, prac: self.answer_2}
+        return {k: v for k, v in res.items() if v is not None}  # filter None values
 
     def __str__(self):
         return ''
@@ -84,3 +96,22 @@ class ResultAnswers(models.Model):
         verbose_name = "Ответ на вопрос"
         verbose_name_plural = "Ответы на вопросы"
 
+
+class TeacherFacultyResult(models.Model):
+    teacher = models.ForeignKey(Teacher, models.CASCADE, verbose_name='Препод')
+    faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
+
+    @classmethod
+    def is_posted(cls, teacher, faculty):
+        return cls.objects.filter(teacher=teacher, faculty=faculty).exist()
+
+    @classmethod
+    def get_results(cls, teacher, faculty):
+        return Result.objects.filter(is_active=True, teacher_n_group__teacher=teacher,
+                                     teacher_n_group__group__faculty=faculty).prefetch_related('answers__question')
+
+    def __str__(self):
+        return f"{self.teacher} в {self.faculty}"
+
+    class Meta:
+        unique_together = ('teacher', 'faculty')

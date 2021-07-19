@@ -1,7 +1,10 @@
+from adminsortable2.admin import SortableAdminMixin
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.forms import Textarea
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.db import models
 
 from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, export_groups, short_fio
 from mainapp.models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
@@ -115,9 +118,10 @@ class FacultyAdmin(ModelAdminByUniver):
 
 
 @admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'answer_tip', 'is_for_eng', 'is_for_lec', 'is_for_pra', 'is_two_answers')
-    list_editable = ('answer_tip',)
+class QuestionAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = ('name', 'question_text', 'answer_tip', 'is_for_eng', 'is_for_lec', 'is_for_pra', 'is_two_answers')
+    list_editable = ('question_text', 'answer_tip',)
+    formfield_overrides = {models.TextField: {'widget': Textarea(attrs={'rows': 2})}}
 
 
 @admin.register(Result)

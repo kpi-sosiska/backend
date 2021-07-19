@@ -13,7 +13,7 @@ def question_keyboard(question, teacher_type, answers=(None, None)):
         mark = '✅' if answers[row_n] == answer_n and answer_n is not None else ''
         return types.InlineKeyboardButton(
             mark + answer_text,
-            callback_data=json.dumps([question.id, row_n, answer_n])
+            callback_data=json.dumps([question.name, row_n, answer_n])
         )
 
     buttons = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'] if question.answer_options == 5 else ['Ні', 'Так']
