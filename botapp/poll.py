@@ -65,13 +65,13 @@ async def start_teacher(message: types.Message, state: FSMContext):
         result.save()  # save result now to have time_start and id
         data['result'] = result.id
 
-        await message.answer(hide_link(tng.teacher.photo) + L['teacher_text'].format(teacher=tng.teacher))
+    await message.answer(hide_link(tng.teacher.photo) + L['teacher_text'].format(teacher=tng.teacher))
 
-        if tng.teacher.is_eng:
-            data['result'].teacher_type = 'ENG'
-            await questions_start(message, state)
-        else:
-            await teacher_type_start(message)
+    if tng.teacher.is_eng:
+        await state.update_data(teacher_type='ENG')
+        await questions_start(message, state)
+    else:
+        await teacher_type_start(message)
 
 
 async def teacher_type_start(message: types.Message):
