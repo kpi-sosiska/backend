@@ -9,13 +9,13 @@ from mainapp.models import Faculty, Teacher, University, TeacherFacultyResult
 class UniverSerializer(serializers.ModelSerializer):
     class Meta:
         model = University
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class TeacherSerializer(serializers.ModelSerializer):
