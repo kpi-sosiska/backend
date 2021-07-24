@@ -83,10 +83,10 @@ class ResultAnswers(models.Model):
     answer_2 = models.PositiveSmallIntegerField('Еще ответ', null=True, blank=True)
 
     def get_answers(self):
-        lec, prac = self.question.name, self.question.name + '_p'
+        gen, prac = self.question.name, self.question.name + '_p'
         if self.result.teacher_type == 'PRACTIC' and self.question.is_two_answers:
             return {prac: self.answer_1}
-        res = {lec: self.answer_1, prac: self.answer_2}
+        res = {gen: self.answer_1, prac: self.answer_2}
         return {k: v for k, v in res.items() if v is not None}  # filter None values
 
     def __str__(self):

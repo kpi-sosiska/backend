@@ -1,14 +1,13 @@
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 
-import mainapp.views
 import pics.views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    url('pic/', pics.views.main),
-    url('test/', mainapp.views.main),
+  path('admin/', admin.site.urls),
+  url('pic/', pics.views.main),
+  path('api/', include('mainapp.api.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

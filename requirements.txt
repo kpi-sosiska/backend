@@ -1,7 +1,8 @@
-aiogram
-Django
-aiohttp
-django-cachalot
+aiogram~=2.13
+Django~=3.2.4
+aiohttp~=3.7.4.post0
 gunicorn
-pyppeteer
-django-admin-sortable2
+pyppeteer~=0.2.5
+django-admin-sortable2~=1.0
+djangorestframework~=3.12.4
+django-filter~=2.4.0
