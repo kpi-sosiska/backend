@@ -141,7 +141,7 @@ class ResultAdmin(admin.ModelAdmin):
 
     list_display = ('user_id', 'teacher', 'group', 'teacher_type', 'is_active')
     list_filter = (
-        'is_active',
+        'is_active', 'open_answer_moderate',
         ('teacher_n_group__teacher', admin.RelatedOnlyFieldListFilter),
         ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter),
     )

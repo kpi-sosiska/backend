@@ -1,7 +1,10 @@
+from functools import reduce
+
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from mainapp.models import Locale
 from mainapp.models.teachers import Faculty, TEACHER_TYPE, Teacher, TeacherNGroup
 
 
@@ -67,6 +70,12 @@ class Result(models.Model):
                     answers.append(None)
                 ResultAnswers.objects.create(result=self, question_id=question_id,
                                              answer_1=answers[0], answer_2=answers[1])
+
+    @property
+    def censored_answer(self):
+        bad_words = Locale['bad_words'].split(' ')
+        return reduce(lambda res, bad_word: res.replace(bad_word, '*' * len(bad_word)),
+                      bad_words, self.open_question_answer)
 
     def __str__(self):
         return f"{self.teacher_n_group} {self.get_teacher_type_display()}"

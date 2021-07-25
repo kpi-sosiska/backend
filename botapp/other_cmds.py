@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from aiogram import types
 
 from botapp.utils import teachers_links
@@ -32,7 +30,7 @@ async def help_cmd(message: types.Message):
     await message.answer(L['help_text'])
 
 
-@dp.message_handler(state='*')
+@dp.message_handler(state='*', chat_type=types.ChatType.PRIVATE)
 async def text_fallback(message: types.Message):
     await message.answer(L['unknown_cmd'])
 

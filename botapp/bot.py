@@ -17,7 +17,7 @@ dp = Dispatcher(bot, storage=storage)
 dp.bind_filter(DeepLinkFilter)
 
 # register handlers
-from . import poll, other_cmds, posting
+from . import poll, moderate, posting, other_cmds
 from .posting import make_new_post
 
 
