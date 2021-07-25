@@ -1,3 +1,4 @@
+import re
 from functools import reduce
 
 from django.db import models, transaction
@@ -74,7 +75,7 @@ class Result(models.Model):
     @property
     def censored_answer(self):
         bad_words = Locale['bad_words'].split(' ')
-        return reduce(lambda res, bad_word: res.replace(bad_word, '*' * len(bad_word)),
+        return reduce(lambda res, bad_word: re.sub(bad_word, '*'*len(bad_word), res, flags=re.IGNORECASE),
                       bad_words, self.open_question_answer)
 
     def __str__(self):
