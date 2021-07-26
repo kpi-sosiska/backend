@@ -45,7 +45,7 @@ class TeacherViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'slug'
 
     @decorators.action(detail=True)
-    def result(self, request, pk=None):
+    def result(self, request, slug=None):
         return response.Response(self.get_object().get_results())
 
 
