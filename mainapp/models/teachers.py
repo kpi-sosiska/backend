@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import Count, Q
+from django.utils.text import slugify
 
+from transliterate import translit
 
 TEACHER_TYPE = {
     'LECTOR': 'Лектор',
@@ -67,15 +69,28 @@ class Group(models.Model):
 
 class Teacher(models.Model):
     id = models.CharField(max_length=36, primary_key=True)
+    slug = models.SlugField('slug', unique=True)
     name = models.CharField('Имя', max_length=200)
     photo = models.CharField('Ссылка на фото', max_length=500, null=True, blank=True)
     is_eng = models.BooleanField('Это англ?', default=False)
 
     univer = models.ForeignKey(University, models.CASCADE, verbose_name='Универ')
-
     groups = models.ManyToManyField(Group, through='TeacherNGroup')
+
     cathedras = models.TextField("Кафедры", null=True, blank=True)
     lessons = models.TextField("Шо ведет", null=True, blank=True)
+
+    def create_slug(self):
+        return slugify(translit(self.short_fio(), 'uk', reversed=True) + self.id[-13:-7])
+
+    def short_fio(self):
+        if '.' in self.name:
+            return self.name
+        try:
+            p = self.name.split(' ')
+            return f"{p[0]} {p[1][0]}. {p[2][0]}"
+        except:
+            return self.name
 
     def __str__(self):
         return self.name

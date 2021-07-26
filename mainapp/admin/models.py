@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 
-from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, export_groups, short_fio
+from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, export_groups
 from mainapp.models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
     University
 
@@ -47,7 +47,7 @@ class GroupAdmin(ModelAdminByUniver):
     @admin.display(description='Преподы')
     def teacher_list(self, obj):
         teachers = obj.teachers.all().values_list('name', flat=True).order_by('name').distinct()
-        return '; '.join([short_fio(t) for t in teachers])
+        return '; '.join([t.short_fio() for t in teachers])
 
     class TeacherInline(admin.TabularInline):
         autocomplete_fields = ('teacher',)

@@ -6,3 +6,4 @@ pyppeteer~=0.2.5
 django-admin-sortable2~=1.0
 djangorestframework~=3.12.4
 django-filter~=2.4.0
+transliterate~=1.10.2

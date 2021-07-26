@@ -36,13 +36,3 @@ def export_groups(model_admin, request, queryset):
         for fac, groups in fac2group.items()
     ])
     return HttpResponse(f"<pre>{text}</pre>")
-
-
-def short_fio(t):
-    if '.' in t:
-        return t
-    try:
-        p = t.split(' ')
-        return f"{p[0]} {p[1][0]}. {p[2][0]}"
-    except:
-        return t
