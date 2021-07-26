@@ -81,7 +81,7 @@ class TeacherAdmin(ModelAdminByUniver):
 
     @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):
-        if obj.faculty.univer_id == 1:
+        if obj.univer_id == 1:
             return mark_safe(f'<a href="http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v={obj.id}">{obj.id}</a>')
 
     @admin.display(description='Фото')
