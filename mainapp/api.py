@@ -33,7 +33,8 @@ class TeacherViewSet(viewsets.ReadOnlyModelViewSet):
     class TeacherSerializer(serializers.ModelSerializer):
         class Meta:
             model = Teacher
-            fields = ['id', 'name']
+            fields = ['name', 'slug']
+            lookup_field = 'slug'
 
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
@@ -41,6 +42,7 @@ class TeacherViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = Pagination
     filterset_fields = ['univer', 'group__faculty']
     search_fields = ['name']
+    lookup_field = 'slug'
 
     @decorators.action(detail=True)
     def result(self, request, pk=None):

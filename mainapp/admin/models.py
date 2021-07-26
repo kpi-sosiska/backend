@@ -90,7 +90,7 @@ class TeacherAdmin(ModelAdminByUniver):
             return mark_safe(f'<img src="{obj.photo}" width="50px">')
 
     univer_field_path = "univer"
-    readonly_fields = ('rozklad_link',)
+    readonly_fields = ('rozklad_link', 'slug')
     list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img')
     list_editable = ('lessons',)
     list_filter = (
