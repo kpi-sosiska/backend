@@ -5,8 +5,12 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from mainapp.models import Locale
+from mainapp.models.other import Locale
 from mainapp.models.teachers import Faculty, TEACHER_TYPE, Teacher, TeacherNGroup
+from collections import Counter, defaultdict
+from typing import Dict, List
+
+MIN_VOTES = 0
 
 
 class Question(models.Model):
@@ -75,8 +79,43 @@ class Result(models.Model):
     @property
     def censored_answer(self):
         bad_words = Locale['bad_words'].split(' ')
-        return reduce(lambda res, bad_word: re.sub(bad_word, '*'*len(bad_word), res, flags=re.IGNORECASE),
+        return reduce(lambda res, bad_word: re.sub(bad_word, '*' * len(bad_word), res, flags=re.IGNORECASE),
                       bad_words, self.open_question_answer)
+
+    @classmethod
+    def for_teacher(cls, teacher):
+        def get_type():
+            if teacher.is_eng:
+                return 'ENG' if c['ENG'] > MIN_VOTES else None
+
+            possible_types = [t for t in ('LECTOR', 'PRACTIC')
+                              if c[t] + c['LECTOR_PRACTIC'] > MIN_VOTES]
+            if not possible_types:
+                raise ValueError("Too few responses")
+            return 'LECTOR_PRACTIC' if len(possible_types) == 2 else possible_types[0]
+
+        results = Result.objects.filter(is_active=True, teacher_n_group__teacher=teacher) \
+            .prefetch_related('answers__question')
+
+        c = Counter([r.teacher_type for r in results])
+        teacher_type = get_type()
+        responses = c['ENG'] if teacher_type == 'ENG' else c['LECTOR'], c['PRACTIC'], c['LECTOR_PRACTIC']
+        comments = [r.open_question_answer for r in results if r.open_answer_moderate]
+
+        answers: Dict[str, List[int]] = defaultdict(list)
+        for r in results:
+            for a in r.answers.all():
+                for qn, answ in a.get_answers().items():
+                    answers[qn].append(answ)
+
+        return {
+            'teacher_name': teacher.name,
+            'teacher_photo': teacher.photo,
+            'teacher_type': teacher_type,
+            'responses': responses,
+            'answers': answers,
+            'comments': comments
+        }
 
     def __str__(self):
         return f"{self.teacher_n_group} {self.get_teacher_type_display()}"
@@ -114,11 +153,6 @@ class TeacherFacultyResult(models.Model):
     @classmethod
     def is_posted(cls, teacher, faculty):
         return cls.objects.filter(teacher=teacher, faculty=faculty).exist()
-
-    @classmethod
-    def get_results(cls, teacher):
-        return Result.objects.filter(is_active=True, teacher_n_group__teacher=teacher)\
-            .prefetch_related('answers__question')
 
     def __str__(self):
         return f"{self.teacher} в {self.faculty}"

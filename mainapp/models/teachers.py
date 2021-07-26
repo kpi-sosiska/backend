@@ -53,6 +53,10 @@ class Group(models.Model):
         from botapp.utils import encode_start_group
         return encode_start_group(self.id)
 
+    def get_results(self):
+        from mainapp.models import Result
+        return Result.for_teacher(self)
+
     def __str__(self):
         return f"{self.name} ({self.faculty})"
 

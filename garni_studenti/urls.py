@@ -5,9 +5,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 import pics.views
+from mainapp.api import router
 
 urlpatterns = [
-  path('admin/', admin.site.urls),
-  url('pic/', pics.views.main),
-  path('api/', include('mainapp.api.urls')),
+    path('admin/', admin.site.urls),
+    url('pic/', pics.views.main),
+    path('api/', include(router.urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
