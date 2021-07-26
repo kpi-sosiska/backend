@@ -28,8 +28,8 @@ class ResultSerializer:
     MIN_VOTES = 0
 
     @classmethod
-    def get_result(cls, teacher, faculty):
-        results = TeacherFacultyResult.get_results(teacher, faculty)
+    def get_result(cls, teacher):
+        results = TeacherFacultyResult.get_results(teacher)
 
         teacher_type, responses = cls.get_responses_and_type(teacher, results)
 

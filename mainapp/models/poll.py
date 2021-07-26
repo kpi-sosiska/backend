@@ -116,9 +116,9 @@ class TeacherFacultyResult(models.Model):
         return cls.objects.filter(teacher=teacher, faculty=faculty).exist()
 
     @classmethod
-    def get_results(cls, teacher, faculty):
-        return Result.objects.filter(is_active=True, teacher_n_group__teacher=teacher,
-                                     teacher_n_group__group__faculty=faculty).prefetch_related('answers__question')
+    def get_results(cls, teacher):
+        return Result.objects.filter(is_active=True, teacher_n_group__teacher=teacher)\
+            .prefetch_related('answers__question')
 
     def __str__(self):
         return f"{self.teacher} в {self.faculty}"

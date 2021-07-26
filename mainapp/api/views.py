@@ -34,8 +34,5 @@ class TeacherViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True)
     def result(self, request, pk=None):
         teacher = self.get_object()
-        faculty_id = request.query_params.get('faculty_id', None)
-        if faculty_id is None:
-            return Response("Provide faculty_id query param", status=status.HTTP_400_BAD_REQUEST)
-        return Response(ResultSerializer.get_result(teacher, faculty_id))
+        return Response(ResultSerializer.get_result(teacher))
 
