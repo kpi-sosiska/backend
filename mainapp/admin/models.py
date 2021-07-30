@@ -46,8 +46,7 @@ class GroupAdmin(ModelAdminByUniver):
 
     @admin.display(description='Преподы')
     def teacher_list(self, obj):
-        teachers = obj.teachers.all().values_list('name', flat=True).order_by('name').distinct()
-        return '; '.join([t.short_fio() for t in teachers])
+        return '; '.join([t.short_fio() for t in obj.teachers.all().distinct()])
 
     class TeacherInline(admin.TabularInline):
         autocomplete_fields = ('teacher',)
