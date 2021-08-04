@@ -92,6 +92,10 @@ class Teacher(models.Model):
         except:
             return self.name
 
+    def save(self, *args, **kwargs):
+        self.slug = self.create_slug()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -115,4 +119,3 @@ class TeacherNGroup(models.Model):
         unique_together = ('teacher', 'group')
         verbose_name = "Препод+Группа"
         verbose_name_plural = "Преподы+Группы"
-
