@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 from contextlib import suppress
 
@@ -8,7 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.markdown import hbold, hitalic, hide_link
 
-from botapp.utils import hash_, question_keyboard, teachers_links
+from botapp.utils import hash_, question_keyboard, teachers_links, cb_answer, cb_help, try_send
 from mainapp import models
 from mainapp.models import Locale as L
 from .bot import dp
@@ -97,47 +96,54 @@ async def teacher_type_query_handler(query: types.CallbackQuery, state: FSMConte
 
 
 async def questions_start(message: types.Message, state: FSMContext):
-    async def _send_msg(question_):
-        for _ in range(5):
-            try:
-                text = hbold(question_.question_text) + \
-                       ('\n\n' + hitalic(question_.answer_tip) if question.answer_tip else '')
-                await message.answer(text, reply_markup=question_keyboard(question_, teacher_type))
-                await asyncio.sleep(0.1)
-                return
-            except exceptions.RetryAfter as ex:
-                await asyncio.sleep(ex.timeout + 1)
-        return await message.answer(L['result_save_error'])  # if can't send message in 5 attempts
-
     async with state.proxy() as data:
         teacher_type = data['teacher_type']
         data['q2a'] = {}
 
         questions = models.Question.get_by_type(teacher_type)
         for question in questions:
-            await _send_msg(question)
+            if not await try_send(message.answer, hbold(question.question_text),
+                                  reply_markup=question_keyboard(question, teacher_type)):
+                return await message.answer(L['result_save_error'])  # if can't send message in 5 attempts
+            await asyncio.sleep(0.1)
+
             data['q2a'][question.name] = [None] * (2 if question.need_two_answers(teacher_type) else 1)
 
     await PollStates.questions.set()
 
 
-@dp.callback_query_handler(state=[PollStates.questions, PollStates.open_question])
-async def questions_handler(query: types.CallbackQuery, state: FSMContext):
-    question, row_n, answer = json.loads(query.data)
+@dp.callback_query_handler(cb_answer.filter(), state=[PollStates.questions, PollStates.open_question])
+async def questions_handler(query: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    question, row_n, answer = callback_data['question'], int(callback_data['row']), int(callback_data['answer'])
     async with state.proxy() as data:
         data['q2a'][question][row_n] = answer
 
-    keyboard = question_keyboard(models.Question.objects.get(name=question),
-                                 teacher_type=data['teacher_type'], answers=data['q2a'][question])
+    keyboard = question_keyboard(models.Question.objects.get(name=question), teacher_type=data['teacher_type'],
+        answers=data['q2a'][question], hide_help=query.message.reply_markup.inline_keyboard[-1][-1].text != "❓")
     with suppress(exceptions.MessageNotModified):
         await query.message.edit_reply_markup(keyboard)
 
-    questions_left = sum(1 for answers in data['q2a'].values() for answer in answers if answer is None)
-    if questions_left:
-        return await query.answer(L['Осталось вопросов: {n}'].format(questions_left))
+    answers_left = sum(1 for answers in data['q2a'].values() for answer in answers if answer is None)
+    if answers_left == 0:
+        await query.answer()
+        await open_question_start(query.message)
 
-    await query.answer()
-    await open_question_start(query.message)
+    if answers_left <= 3:
+        await query.answer(L['answers_left'].format(answers_left))
+
+
+@dp.callback_query_handler(cb_help.filter(question='2answ'), state='*')
+async def questions_handler(query: types.CallbackQuery):
+    await query.answer(L['2answ_help'])
+
+
+@dp.callback_query_handler(cb_help.filter(), state=[PollStates.questions, PollStates.open_question])
+async def questions_handler(query: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    q = models.Question.objects.get(name=callback_data['question'])
+    data = await state.get_data()
+    text = hbold(q.question_text) + ('\n\n' + hitalic(q.answer_tip) if q.answer_tip else '')
+    keyboard = question_keyboard(q, teacher_type=data['teacher_type'], answers=data['q2a'][q.name], hide_help=True)
+    await query.message.edit_text(text, reply_markup=keyboard)
 
 
 async def open_question_start(message: types.Message):

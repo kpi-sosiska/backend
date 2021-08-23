@@ -1,33 +1,49 @@
-import json
+import asyncio
 from hashlib import md5
 
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
-from aiogram.utils import deep_linking
+from aiogram.utils import deep_linking, exceptions
+from aiogram.utils.callback_data import CallbackData
 from aiogram.utils.markdown import hlink
 from mainapp.models import Locale as L
 
+cb_answer = CallbackData("answer", "question", "row", "answer")
+cb_help = CallbackData("help", "question")
+_lec_btn = types.InlineKeyboardButton(L['2answrs_LECTOR'], callback_data=cb_help.new("2answ"))
+_pra_btn = types.InlineKeyboardButton(L['2answrs_PRACTIC'], callback_data=cb_help.new("2answ"))
 
-def question_keyboard(question, teacher_type, answers=(None, None)):
-    def _make_btn(answer_text, row_n, answer_n):
-        mark = '✅' if answers[row_n] == answer_n and answer_n is not None else ''
-        return types.InlineKeyboardButton(
-            mark + answer_text,
-            callback_data=json.dumps([question.name, row_n, answer_n])
-        )
+
+def question_keyboard(question, teacher_type, answers=(None, None), hide_help=False):
+    def _vote_btns(row_num):
+        return [
+            types.InlineKeyboardButton(
+                ('✅' if answers[row_num] == btn_num else '') + btn_text,
+                callback_data=cb_answer.new(question.name, row_num, btn_num))
+            for btn_num, btn_text in enumerate(buttons)]
 
     buttons = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'] if question.answer_options == 5 else ['Ні', 'Так']
-    buttons = list(enumerate(buttons))
-    buttons = [[(None, L['2answrs_LECTOR']), *buttons],
-               [(None, L['2answrs_PRACTIC']), *buttons]] \
-        if question.need_two_answers(teacher_type) else \
-        [[*buttons]]
+    help_btn = types.InlineKeyboardButton("❓", callback_data=cb_help.new(question.name))
+    keyboard = types.InlineKeyboardMarkup(row_width=6)
 
-    return types.InlineKeyboardMarkup(row_width=len(buttons[0])).add(*[
-        _make_btn(answer_text, row_n, answer_n)
-        for row_n, answers_row in enumerate(buttons)
-        for answer_n, answer_text in answers_row
-    ])
+    if question.need_two_answers(teacher_type):
+        keyboard.row(_lec_btn, *_vote_btns(0)).row(_pra_btn, *_vote_btns(1))
+    else:
+        keyboard.row(*_vote_btns(0))
+
+    if not hide_help and question.answer_tip:
+        keyboard.insert(help_btn)
+    return keyboard
+
+
+async def try_send(func, *args, **kwargs):
+    for _ in range(5):
+        try:
+            await func(*args, **kwargs)
+            return True
+        except exceptions.RetryAfter as ex:
+            await asyncio.sleep(ex.timeout + 1)
+    return False
 
 
 def teachers_links(tngs):
