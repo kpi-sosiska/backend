@@ -121,11 +121,9 @@ async def questions_start(message: types.Message, state: FSMContext):
     await PollStates.questions.set()
 
 
-@dp.callback_query_handler(state=PollStates.questions)
+@dp.callback_query_handler(state=[PollStates.questions, PollStates.open_question])
 async def questions_handler(query: types.CallbackQuery, state: FSMContext):
     question, row_n, answer = json.loads(query.data)
-    await query.answer()
-
     async with state.proxy() as data:
         data['q2a'][question][row_n] = answer
 
@@ -134,8 +132,12 @@ async def questions_handler(query: types.CallbackQuery, state: FSMContext):
     with suppress(exceptions.MessageNotModified):
         await query.message.edit_reply_markup(keyboard)
 
-    if all(answer is not None for answers in data['q2a'].values() for answer in answers):
-        await open_question_start(query.message)
+    questions_left = sum(1 for answers in data['q2a'].values() for answer in answers if answer is None)
+    if questions_left:
+        return await query.answer(L['Осталось вопросов: {n}'].format(questions_left))
+
+    await query.answer()
+    await open_question_start(query.message)
 
 
 async def open_question_start(message: types.Message):
