@@ -224,4 +224,4 @@ async def two_group_one_user_handler(query: types.CallbackQuery, state: FSMConte
 def _2g1u_results(user_id, tng):
     return models.Result.objects \
         .filter(is_active=True, user_id=hash_(user_id)) \
-        .exclude(teacher_n_group__group=tng.group).update(is_active=False)
+        .exclude(teacher_n_group__group=tng.group)

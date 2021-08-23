@@ -86,7 +86,9 @@ class Result(models.Model):
     def for_teacher(cls, teacher):
         def get_type():
             if teacher.is_eng:
-                return 'ENG' if c['ENG'] > MIN_VOTES else None
+                if c['ENG'] > MIN_VOTES:
+                    return 'ENG'
+                raise ValueError("Too few responses")
 
             possible_types = [t for t in ('LECTOR', 'PRACTIC')
                               if c[t] + c['LECTOR_PRACTIC'] > MIN_VOTES]
@@ -100,7 +102,6 @@ class Result(models.Model):
         c = Counter([r.teacher_type for r in results])
         teacher_type = get_type()
         responses = c['ENG'] if teacher_type == 'ENG' else c['LECTOR'], c['PRACTIC'], c['LECTOR_PRACTIC']
-        comments = [r.open_question_answer for r in results if r.open_answer_moderate]
 
         answers: Dict[str, List[int]] = defaultdict(list)
         for r in results:
@@ -114,7 +115,6 @@ class Result(models.Model):
             'teacher_type': teacher_type,
             'responses': responses,
             'answers': answers,
-            'comments': comments
         }
 
     def __str__(self):
@@ -149,13 +149,21 @@ class ResultAnswers(models.Model):
 class TeacherFacultyResult(models.Model):
     teacher = models.ForeignKey(Teacher, models.CASCADE, verbose_name='Препод')
     faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
+    message_id = models.IntegerField()
 
-    @classmethod
-    def is_posted(cls, teacher, faculty):
-        return cls.objects.filter(teacher=teacher, faculty=faculty).exist()
+    def tg_link(self):
+        return self.faculty.poll_result_link.removeprefix('@') + str(self.message_id)
 
     def __str__(self):
         return f"{self.teacher} в {self.faculty}"
 
     class Meta:
         unique_together = ('teacher', 'faculty')
+
+
+
+#  защита от спама
+# 1. время заполнения анкеты
+# 2. у препода много похожих ответов от людей, которые проходили только этого препода
+# 3. у голосовавшего все ответы похожи
+#

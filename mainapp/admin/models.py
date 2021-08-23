@@ -76,7 +76,7 @@ class TeacherAdmin(ModelAdminByUniver):
 
     @admin.display(description='Факультеты')
     def faculties(self, obj):
-        return list(Faculty.objects.filter(group__teachers__id=obj.id).distinct())
+        return list(obj.get_faculties().distinct())
 
     @admin.display(description='Ссылка на розклад')
     def rozklad_link(self, obj):

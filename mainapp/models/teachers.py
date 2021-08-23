@@ -47,10 +47,6 @@ class Group(models.Model):
             results_cnt=Count('result', filter=Q(result__is_active=True))
         ).order_by('results_cnt')
 
-    @classmethod
-    def get_groups(cls):
-        return cls.objects.values_list('id')
-
     def link(self):
         from botapp.utils import encode_start_group
         return encode_start_group(self.id)
@@ -79,6 +75,14 @@ class Teacher(models.Model):
     def get_results(self):
         from mainapp.models import Result
         return Result.for_teacher(self)
+
+    def get_faculties(self):
+        return Faculty.objects.filter(group__teacher=self)
+
+    def get_comments(self):
+        from mainapp.models import Result
+        return Result.objects.filter(is_active=True, teacher_n_group__teacher=self,
+                                     open_answer_moderate=True).values_list('open_question_answer')
 
     def create_slug(self):
         return slugify(translit(self.short_fio(), 'uk', reversed=True) + self.id[-13:-7])
