@@ -122,13 +122,14 @@ async def questions_handler(query: types.CallbackQuery, state: FSMContext, callb
         answers=data['q2a'][question], hide_help=query.message.reply_markup.inline_keyboard[-1][-1].text != "❓")
     with suppress(exceptions.MessageNotModified):
         await query.message.edit_reply_markup(keyboard)
-    await query.answer()
 
     answers_left = sum(1 for answers in data['q2a'].values() for answer in answers if answer is None)
     if answers_left == 0 and await state.get_state() != PollStates.open_question:
-        await open_question_start(query.message)
-    elif answers_left <= 3:
+        await query.answer()
+        return await open_question_start(query.message)
+    if answers_left <= 3:
         await query.answer(L['answers_left'].format(answers_left))
+    await query.answer()
 
 
 @dp.callback_query_handler(cb_help.filter(question='2answ'), state='*')
