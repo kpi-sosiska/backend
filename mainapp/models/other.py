@@ -14,13 +14,9 @@ class Locale(models.Model):
     key = models.CharField(max_length=50, unique=True)
     value = models.TextField(null=True)
 
-    _cache = dict()
-
     def __class_getitem__(cls, key) -> str:
-        if key not in cls._cache:
-            obj, _ = cls.objects.get_or_create(key=key)
-            cls._cache[key] = obj.value or obj.key
-        return cls._cache[key]
+        obj, _ = cls.objects.get_or_create(key=key)
+        return obj.value or obj.key
 
     def __str__(self):
         return f"{self.key} -> {self.value or 'Не заполнено'}"
