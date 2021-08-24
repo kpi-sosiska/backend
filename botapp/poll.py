@@ -124,7 +124,7 @@ async def questions_handler(query: types.CallbackQuery, state: FSMContext, callb
         await query.message.edit_reply_markup(keyboard)
 
     answers_left = sum(1 for answers in data['q2a'].values() for answer in answers if answer is None)
-    if answers_left == 0 and await state.get_state() != PollStates.open_question:
+    if answers_left == 0 and await state.get_state() != PollStates.open_question.state:
         await query.answer()
         return await open_question_start(query.message)
     if answers_left <= 3:
