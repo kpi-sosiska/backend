@@ -64,6 +64,7 @@ class Result(models.Model):
 
     def finish(self, teacher_type, open_question_answer, other_answers):
         with transaction.atomic():
+            Result.objects.filter(user_id=self.user_id, teacher_n_group=self.teacher_n_group).update(is_active=False)
             self.teacher_type = teacher_type
             self.open_question_answer = open_question_answer
             self.is_active = True
