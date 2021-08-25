@@ -44,7 +44,11 @@ async def start_poll(message: types.Message, state: FSMContext, payload: str):
     except (ValueError, models.TeacherNGroup.DoesNotExist):
         return await message.answer(L['wrong_link'])
 
-    await state.set_data(dict(teacher_n_group=payload))
+    async with state.proxy() as data:
+        data['teacher_n_group'] = payload
+        result = models.Result(user_id=hash_(message.from_user.id), teacher_n_group=teacher_n_group)
+        result.save()  # save result now to have time_start and id
+        data['result'] = result.id
 
     # если у челика есть прохождения опроса с других групп то предупреждаем
     if await two_group_one_user(message, state):
@@ -58,11 +62,7 @@ async def start_poll(message: types.Message, state: FSMContext, payload: str):
 
 
 async def start_teacher(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        tng = models.TeacherNGroup.objects.get(id=data['teacher_n_group'])
-        result = models.Result(user_id=hash_(message.from_user.id), teacher_n_group=tng)
-        result.save()  # save result now to have time_start and id
-        data['result'] = result.id
+    tng = models.TeacherNGroup.objects.get(id=(await state.get_data())['teacher_n_group'])
 
     await message.answer(hide_link(tng.teacher.photo) + L['teacher_text'].format(teacher=tng.teacher))
 
