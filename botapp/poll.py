@@ -19,6 +19,7 @@ class PollStates(StatesGroup):
     open_question = State()
 
     two_group_one_user = State()
+    same_teacher_again = State()
 
 
 """
@@ -54,9 +55,9 @@ async def start_poll(message: types.Message, state: FSMContext, payload: str):
     if await two_group_one_user(message, state):
         return
 
-    if models.Result.objects.filter(is_active=True, user_id=hash_(message.from_user.id),
-                                    teacher_n_group=teacher_n_group).exists():
-        await message.answer(L['same_teacher_again'])
+    # если челик перепроходит препода
+    if await same_teacher_again(message, state):
+        return
 
     await start_teacher(message, state)
 
@@ -197,6 +198,51 @@ async def send_other_teachers_in_group(message: types.Message, state: FSMContext
 
 #
 
+KEYBOARD_STA = types.InlineKeyboardMarkup().add(
+    types.InlineKeyboardButton(L['btn_sta_reset'], callback_data='sta_reset'),
+    types.InlineKeyboardButton(L['btn_sta_copy'], callback_data='sta_copy')
+)
+
+
+async def same_teacher_again(message: types.Message, state: FSMContext):
+    if models.Result.objects.filter(is_active=True, user_id=hash_(message.from_user.id),
+                                    teacher_n_group_id=(await state.get_data())['teacher_n_group']).exists():
+        await message.answer(L['same_teacher_again'], reply_markup=KEYBOARD_STA)
+        await PollStates.same_teacher_again.set()
+        return True
+    return False
+
+
+@dp.callback_query_handler(lambda q: q.data.startswith('sta'), state=PollStates.same_teacher_again)
+async def same_teacher_again_handler(query: types.CallbackQuery, state: FSMContext):
+    await query.answer()
+    await query.message.edit_reply_markup()
+
+    if query.data == 'sta_reset':
+        return await start_teacher(query.message, state)
+
+    async with state.proxy() as data:
+        result = models.Result.objects.filter(is_active=True, user_id=hash_(query.from_user.id),
+                                              teacher_n_group_id=data['teacher_n_group']).first()
+        data['teacher_type'] = result.teacher_type
+        data['q2a'] = {}
+
+        # copy from questions_start
+        for a in result.answers.all():
+            answers = [a.answer_1, a.answer_2]
+            if not await try_send(query.message.answer, hbold(a.question.question_text),
+                                  reply_markup=question_keyboard(a.question, result.teacher_type, answers)):
+                return await query.message.answer(L['result_save_error'])  # if can't send message in 5 attempts
+            await asyncio.sleep(0.1)
+            data['q2a'][a.question.name] = [i for i in answers if i is not None]
+
+        if result.open_question_answer:
+            await query.message.answer(L['open_question_text_old'])
+            await query.message.answer(result.open_question_answer)
+
+    await open_question_start(query.message)
+
+#
 
 KEYBOARD_2G1U = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(L['btn_reset_2g1u'], callback_data='reset'))
 
