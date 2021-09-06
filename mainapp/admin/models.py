@@ -48,6 +48,10 @@ class GroupAdmin(ModelAdminByUniver):
     def teacher_list(self, obj):
         return '; '.join([t.short_fio() for t in obj.teachers.all().distinct()])
 
+    @admin.display(description='Кол-во голосов')
+    def votes_count(self, obj):
+        return Result.objects.filter(teacher_n_group__group=obj, is_active=True).count()
+
     class TeacherInline(admin.TabularInline):
         autocomplete_fields = ('teacher',)
         model = TeacherNGroup
@@ -56,7 +60,7 @@ class GroupAdmin(ModelAdminByUniver):
     univer_field_path = "faculty__univer"
     readonly_fields = ('rozklad_link', 'link')
     autocomplete_fields = ('faculty',)
-    list_display = ('name', 'faculty', 'teacher_list')
+    list_display = ('name', 'faculty', 'teacher_list', 'votes_count')
     list_filter = (
         ('faculty', RelatedFieldListFilterByUniver),
         ('faculty__univer', admin.RelatedOnlyFieldListFilter),
