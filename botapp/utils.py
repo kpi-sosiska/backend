@@ -72,11 +72,12 @@ def teachers_links(tngs):
     if state == '1':
         f = lambda tng: '• ' + _link(tng[1])
     elif state == '2':
-        _mark = lambda tng: ('❗️ ' if tng[1].results_cnt < 5 or tng[0] < 5 else '• ')
+        _mark = lambda tng: ('❗️ ' if tng[1].result_need > 0 or tng[0] < 5 else '• ')
         f = lambda tng: _mark(tng) + _link(tng[1])
     else:
-        tngs = tngs.filter(results_cnt__bt=10)
-        f = lambda tng: '❗ ' + _link(tng[1]) + f"ещё {10 - tng[1].results_cnt} ответов"
+        tngs = tngs.filter(result_need__gt=0)
+        f = lambda tng: '❗ ' + _link(tng[1]) + f"   нужно ещё {tng[1].result_need} " + \
+                        case_by_num(tng[1].result_need, 'ответ', 'ответа', 'ответов')
 
     return '\n'.join(map(f, enumerate(tngs)))
 
@@ -125,3 +126,13 @@ class DeepLinkFilter(BoundFilter):
 
 def hash_(user_id):
     return md5(str(user_id).encode('ascii')).hexdigest()
+
+
+def case_by_num(num: int, c_1: str, c_2: str, c_3: str) -> str:
+    if 11 <= num <= 14:
+        return c_3
+    if num % 10 == 1:
+        return c_1
+    if 2 <= num % 10 <= 4:
+        return c_2
+    return c_3

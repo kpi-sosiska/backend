@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.utils.text import slugify
 
 from transliterate import translit
@@ -26,6 +26,7 @@ class University(models.Model):
 class Faculty(models.Model):
     name = models.CharField('Факультет', max_length=10, null=True)
     univer = models.ForeignKey(University, models.CASCADE, verbose_name='Универ')
+    votes_threshold = models.SmallIntegerField('Минимальное количество голосов для препода', default=10)
     poll_result_link = models.CharField('Ссылка на результаты опроса', max_length=100, null=True)
 
     def __str__(self):
@@ -44,7 +45,8 @@ class Group(models.Model):
 
     def teacher_need_votes(self):
         return self.teacherngroup_set.all().annotate(
-            results_cnt=Count('result', filter=Q(result__is_active=True))
+            results_cnt=Count('result', filter=Q(result__is_active=True)),
+            result_need=F('group__faculty__votes_threshold') - F('results_cnt'),
         ).order_by('results_cnt')
 
     def link(self):
