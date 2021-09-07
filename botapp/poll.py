@@ -7,7 +7,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.markdown import hbold, hitalic, hide_link
 
-from botapp.utils import hash_, question_keyboard, teachers_links, cb_answer, cb_help, try_send
+from botapp.utils import hash_, question_keyboard, cb_answer, cb_help, try_send, \
+    send_other_teachers_in_group
 from mainapp import models
 from mainapp.models import Locale as L
 from .bot import dp
@@ -120,7 +121,8 @@ async def questions_handler(query: types.CallbackQuery, state: FSMContext, callb
         data['q2a'][question][row_n] = answer
 
     keyboard = question_keyboard(models.Question.objects.get(name=question), teacher_type=data['teacher_type'],
-        answers=data['q2a'][question], hide_help=query.message.reply_markup.inline_keyboard[-1][-1].text != "❓")
+                                 answers=data['q2a'][question],
+                                 hide_help=query.message.reply_markup.inline_keyboard[-1][-1].text != "❓")
     with suppress(exceptions.MessageNotModified):
         await query.message.edit_reply_markup(keyboard)
 
@@ -154,20 +156,21 @@ async def open_question_start(message: types.Message):
 
 @dp.message_handler(state=PollStates.open_question)
 async def open_question_query_handler(message: types.Message, state: FSMContext):
-    if message.text in ('/skip', '/confirm'):
+    async with state.proxy() as data:
+        if message.text not in ('/skip', '/confirm'):
+            data['open_question'] = message.text
+            return await message.answer(L['confirm_open_question_text'])
+
         if message.text == '/skip':
-            await state.update_data(open_question=None)
+            data['open_question'] = None
 
-        await save_to_db(message, state)
-        await send_other_teachers_in_group(message, state)
-        await state.finish()
-    else:
-        await state.update_data(open_question=message.text)
-        await message.answer(L['confirm_open_question_text'])
+    await save_to_db(message, data)
+    await send_other_teachers_in_group(
+        message, models.TeacherNGroup.objects.get(id=data['teacher_n_group']).group)
+    await state.finish()
 
 
-async def save_to_db(message: types.Message, state: FSMContext):
-    data = await state.get_data()
+async def save_to_db(message: types.Message, data: dict):
     try:
         models.Result.objects.get(id=data['result']).finish(
             teacher_type=data['teacher_type'],
@@ -178,22 +181,6 @@ async def save_to_db(message: types.Message, state: FSMContext):
         logging.exception("Failed to save")
     else:
         await message.answer(L['result_save_success'], reply_markup=types.ReplyKeyboardRemove())
-
-
-#
-
-
-async def send_other_teachers_in_group(message: types.Message, state: FSMContext):
-    group = models.TeacherNGroup.objects.get(id=(await state.get_data())['teacher_n_group']).group
-
-    # преподы которых еще нужно пройти отсортированные по кол-ву прохождений
-    teachers = group.teacher_need_votes(). \
-        exclude(result__user_id=hash_(message.from_user.id), result__is_active=True)
-
-    if teachers:
-        text = L['other_teachers_in_group_text'].format(group_name=group.name.upper(),
-                                                        teachers=teachers_links(teachers))
-        await message.answer(text)
 
 
 #
@@ -241,6 +228,7 @@ async def same_teacher_again_handler(query: types.CallbackQuery, state: FSMConte
             await query.message.answer(result.open_question_answer)
 
     await open_question_start(query.message)
+
 
 #
 

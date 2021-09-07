@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters import BoundFilter
 from aiogram.utils import deep_linking, exceptions
 from aiogram.utils.callback_data import CallbackData
 from aiogram.utils.markdown import hlink
-from mainapp.models import Locale as L
+from mainapp.models import Locale as L, Group
 
 cb_answer = CallbackData("answer", "question", "row", "answer")
 cb_help = CallbackData("help", "question")
@@ -46,11 +46,39 @@ async def try_send(func, *args, **kwargs):
     return False
 
 
+def opros_state():
+    state = L['opros_state']
+    return '1' if state not in ('1', '2', '3') else state
+
+
+async def send_other_teachers_in_group(message: types.Message, group: Group):
+    # преподы которых еще нужно пройти отсортированные по кол-ву прохождений
+    teachers = group.teacher_need_votes(). \
+        exclude(result__user_id=hash_(message.from_user.id), result__is_active=True)
+
+    if teachers:
+        text = L['other_teachers_in_group_text' + opros_state()].format(
+            group_name=group.name.upper(),
+            teachers=teachers_links(teachers))
+        await message.answer(text)
+
+
 def teachers_links(tngs):
-    return '\n'.join([
-        '• ' + hlink(tng.teacher.name, encode_start_teacher(tng))
-        for tng in tngs
-    ])
+    def _link(t):
+        return hlink(t.teacher.name, encode_start_teacher(t))
+
+    state = opros_state()
+
+    if state == '1':
+        f = lambda tng: '• ' + _link(tng[1])
+    elif state == '2':
+        _mark = lambda tng: ('❗️ ' if tng[1].results_cnt < 5 or tng[0] < 5 else '• ')
+        f = lambda tng: _mark(tng) + _link(tng[1])
+    else:
+        tngs = tngs.filter(results_cnt__bt=10)
+        f = lambda tng: '❗ ' + _link(tng[1]) + f"ещё {10 - tng[1].results_cnt} ответов"
+
+    return '\n'.join(map(f, enumerate(tngs)))
 
 
 def encode_start_teacher(techer_n_group):
@@ -59,6 +87,10 @@ def encode_start_teacher(techer_n_group):
 
 def encode_start_group(group_id):
     return _encode_deep_link('g', group_id)
+
+
+def encode_start_group_user(group_id):
+    return _encode_deep_link('gu', group_id)
 
 
 def _encode_deep_link(*args):
