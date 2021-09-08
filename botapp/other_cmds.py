@@ -1,9 +1,17 @@
 from aiogram import types
 
-from botapp.utils import teachers_links, encode_start_group_user, send_other_teachers_in_group, opros_state
+from botapp.utils import teachers_links, encode_start_group_user, send_other_teachers_in_group, opros_state, hash_
 from mainapp import models
 from mainapp.models import Locale as L
 from .bot import dp
+
+
+@dp.message_handler(commands=['teachers_left'], state='*')
+async def teachers_left(message: types.Message):
+    r = models.Result.objects.filter(is_active=True, user_id=hash_(message.from_user.id)).first()
+    if not r:
+        return await message.answer(L['user_no_group'])
+    await send_other_teachers_in_group(message, r.teacher_n_group.group)
 
 
 @dp.message_handler(commands=['start'], state='*', deep_link='g')
