@@ -45,7 +45,7 @@ class Group(models.Model):
 
     def teacher_need_votes(self):
         return self.teacherngroup_set.all().annotate(
-            results_cnt=Count('result', filter=Q(result__is_active=True)),
+            results_cnt=Count('teacher__teacherngroup__result', filter=Q(result__is_active=True)),
             result_need=F('group__faculty__votes_threshold') - F('results_cnt'),
         ).order_by('results_cnt')
 
