@@ -56,11 +56,13 @@ async def send_other_teachers_in_group(message: types.Message, group: Group):
     teachers = group.teacher_need_votes(). \
         exclude(result__user_id=hash_(message.from_user.id), result__is_active=True)
 
-    if teachers:
-        text = L['other_teachers_in_group_text' + opros_state()].format(
-            group_name=group.name.upper(),
-            teachers=teachers_links(teachers))
-        await message.answer(text)
+    if not teachers:
+        return await message.answer(L['all_prepods_voted'])
+
+    text = L['other_teachers_in_group_text' + opros_state()].format(
+        group_name=group.name.upper(),
+        teachers=teachers_links(teachers))
+    await message.answer(text)
 
 
 def teachers_links(tngs):
