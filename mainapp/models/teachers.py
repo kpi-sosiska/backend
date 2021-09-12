@@ -4,7 +4,6 @@ from django.utils.text import slugify
 
 from transliterate import translit
 
-from mainapp.models import Result
 
 TEACHER_TYPE = {
     'LECTOR': 'Лектор',
