@@ -1,8 +1,10 @@
 from django.db import models
-from django.db.models import Count, Q, F
+from django.db.models import Count, Q, F, Subquery
 from django.utils.text import slugify
 
 from transliterate import translit
+
+from mainapp.models import Result
 
 TEACHER_TYPE = {
     'LECTOR': 'Лектор',
@@ -44,8 +46,10 @@ class Group(models.Model):
     teachers = models.ManyToManyField('Teacher', through='TeacherNGroup')
 
     def teacher_need_votes(self):
+        # todo пиздец оно по другому никак не хотело правильно считать
         return self.teacherngroup_set.all().annotate(
-            results_cnt=Count('teacher__teacherngroup__result', filter=Q(result__is_active=True)),
+            results_cnt=Count('teacher__teacherngroup__result',
+                              filter=Q(teacher__teacherngroup__result__is_active=True) & Q(teacher__teacherngroup__result__teacher_n_group__teacher_id=F('teacher_id'))),
             result_need=F('group__faculty__votes_threshold') - F('results_cnt'),
         ).order_by('results_cnt')
 
