@@ -50,7 +50,8 @@ class GroupAdmin(ModelAdminByUniver):
 
     @admin.display(description='Кол-во голосов')
     def votes_count(self, obj):
-        return Result.objects.filter(teacher_n_group__group=obj, is_active=True).count()
+        all_ = Result.objects.filter(teacher_n_group__group=obj, is_active=True).values('user_id')
+        return f"{all_.count()} ({all_.distinct().count()})"
 
     class TeacherInline(admin.TabularInline):
         autocomplete_fields = ('teacher',)
