@@ -92,9 +92,13 @@ class TeacherAdmin(ModelAdminByUniver):
         if obj.photo:
             return mark_safe(f'<img src="{obj.photo}" width="50px">')
 
+    @admin.display(description='Кол-во голосов')
+    def votes_count(self, obj):
+        return Result.objects.filter(teacher_n_group__teacher=obj, is_active=True).count()
+
     univer_field_path = "univer"
     readonly_fields = ('rozklad_link', 'slug')
-    list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img')
+    list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img', 'votes_count')
     list_editable = ('lessons',)
     list_filter = (
         ('groups__faculty', RelatedFieldListFilterByUniver),
