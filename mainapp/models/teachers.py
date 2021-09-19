@@ -48,7 +48,10 @@ class Group(models.Model):
         # todo пиздец оно по другому никак не хотело правильно считать
         return self.teacherngroup_set.all().annotate(
             results_cnt=Count('teacher__teacherngroup__result',
-                              filter=Q(teacher__teacherngroup__result__is_active=True) & Q(teacher__teacherngroup__result__teacher_n_group__teacher_id=F('teacher_id'))),
+                              filter=Q(teacher__teacherngroup__result__is_active=True) &
+                                     Q(teacher__teacherngroup__result__teacher_n_group__teacher_id=F('teacher_id')) &
+                                     Q(teacher__teacherngroup__result__teacher_n_group__group__faculty_id=self.faculty_id)
+                              ),
             result_need=F('group__faculty__votes_threshold') - F('results_cnt'),
         ).order_by('results_cnt')
 
