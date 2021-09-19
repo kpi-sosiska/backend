@@ -72,16 +72,16 @@ def teachers_links(tngs):
     state = opros_state()
 
     if state == '1':
-        f = lambda tng: '• ' + _link(tng[1])
+        f = lambda tng: '• ' + _link(tng)
     elif state == '2':
-        _mark = lambda tng: ('❗️ ' if tng[1].result_need > 0 or tng[0] < 5 else '• ')
-        f = lambda tng: _mark(tng) + _link(tng[1])
+        _mark = lambda tng: ('❗️ ' if tng.result_need > 0 or tng[0] < 5 else '• ')  # todo
+        f = lambda tng: _mark(tng) + _link(tng)
     else:
-        tngs = [tng for i, tng in enumerate(tngs) if 0 < tng.result_need < 6 and i < 5]
-        f = lambda tng: '❗ ' + _link(tng[1]) + f" (ще {tng[1].result_need} " + \
-                        case_by_num(tng[1].result_need, 'відповідь', 'відповіді', 'відповідей') + ')'
+        tngs = [tng for tng in tngs if 0 < tng.result_need < 6][:5]
+        f = lambda tng: '❗ ' + _link(tng) + f" (ще {tng.result_need} " + \
+                        case_by_num(tng.result_need, 'відповідь', 'відповіді', 'відповідей') + ')'
 
-    return '\n'.join(map(f, enumerate(tngs)))
+    return '\n'.join(map(f, tngs))
 
 
 def encode_start_teacher(techer_n_group):
