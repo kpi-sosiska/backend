@@ -77,7 +77,7 @@ def teachers_links(tngs):
         _mark = lambda tng: ('❗️ ' if tng.result_need > 0 or tng[0] < 5 else '• ')  # todo
         f = lambda tng: _mark(tng) + _link(tng)
     else:
-        tngs = [tng for tng in tngs if 0 < tng.result_need < 6][:5]
+        tngs = [tng for tng in tngs if tng.result_need > 0][:5]
         f = lambda tng: '❗ ' + _link(tng) + f" (ще {tng.result_need} " + \
                         case_by_num(tng.result_need, 'відповідь', 'відповіді', 'відповідей') + ')'
 
