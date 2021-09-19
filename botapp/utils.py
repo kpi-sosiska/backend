@@ -78,7 +78,7 @@ def teachers_links(tngs):
         f = lambda tng: _mark(tng) + _link(tng[1])
     else:
         tngs = [tng for i, tng in enumerate(tngs) if 0 < tng.result_need < 6 and i < 5]
-        f = lambda tng: '❗ ' + _link(tng[1]) + f"   ещё {tng[1].result_need} " + \
+        f = lambda tng: '❗ ' + _link(tng[1]) + f"   ще {tng[1].result_need} " + \
                         case_by_num(tng[1].result_need, 'відповідь', 'відповіді', 'відповідей')
 
     return '\n'.join(map(f, enumerate(tngs)))
