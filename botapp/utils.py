@@ -61,17 +61,17 @@ async def send_other_teachers_in_group(message: types.Message, group: Group):
 
     text = L['other_teachers_in_group_text' + opros_state()].format(
         group_name=group.name.upper(),
-        teachers=teachers_links(teachers))
+        teachers=teachers_links(teachers, is_ls=True))
     await message.answer(text)
 
 
-def teachers_links(tngs):
+def teachers_links(tngs, is_ls=False):
     def _link(t):
         return hlink(t.teacher.name, encode_start_teacher(t))
 
     state = opros_state()
 
-    if state == '1':
+    if is_ls or state == '1':
         f = lambda tng: '• ' + _link(tng)
     elif state == '2':
         _mark = lambda tng: ('❗️ ' if tng.result_need > 0 or tng[0] < 5 else '• ')  # todo
