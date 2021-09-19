@@ -70,8 +70,10 @@ def teachers_links(tngs, is_ls=False):
         return hlink(t.teacher.name, encode_start_teacher(t))
 
     state = opros_state()
+    if is_ls and state == '3':
+        state = 2
 
-    if is_ls or state == '1':
+    if state == '1':
         f = lambda tng: '• ' + _link(tng)
     elif state == '2':
         _mark = lambda tng: ('❗️ ' if tng.result_need > 0 or tng[0] < 5 else '• ')  # todo
