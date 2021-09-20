@@ -71,7 +71,7 @@ def teachers_links(tngs, is_ls=False):
 
     state = opros_state()
     if is_ls and state == '3':
-        state = 2
+        state = '2'
 
     if state == '1':
         f = lambda tng: '• ' + _link(tng)
