@@ -76,7 +76,7 @@ def teachers_links(tngs, is_ls=False):
     if state == '1':
         f = lambda tng: '• ' + _link(tng)
     elif state == '2':
-        _mark = lambda tng: ('❗️ ' if tng.result_need > 0 or tng[0] < 5 else '• ')  # todo
+        _mark = lambda tng: ('❗️ ' if tng.result_need > 0 else '• ')  # todo or tng[0] < 5
         f = lambda tng: _mark(tng) + _link(tng)
     else:
         tngs = [tng for tng in tngs if tng.result_need > 0][:5]
