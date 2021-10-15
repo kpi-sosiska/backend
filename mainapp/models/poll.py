@@ -1,7 +1,8 @@
 import re
+from contextlib import suppress
 from functools import reduce
 
-from django.db import models, transaction
+from django.db import models, transaction, IntegrityError
 from django.db.models import Q
 from django.utils import timezone
 
@@ -9,8 +10,6 @@ from mainapp.models.other import Locale
 from mainapp.models.teachers import Faculty, TEACHER_TYPE, Teacher, TeacherNGroup
 from collections import Counter, defaultdict
 from typing import Dict, List
-
-MIN_VOTES = 0
 
 
 class Question(models.Model):
@@ -83,41 +82,6 @@ class Result(models.Model):
         return reduce(lambda res, bad_word: re.sub(bad_word, '*' * len(bad_word), res, flags=re.IGNORECASE),
                       bad_words, self.open_question_answer)
 
-    @classmethod
-    def for_teacher(cls, teacher):
-        def get_type():
-            if teacher.is_eng:
-                if c['ENG'] > MIN_VOTES:
-                    return 'ENG'
-                raise ValueError("Too few responses")
-
-            possible_types = [t for t in ('LECTOR', 'PRACTIC')
-                              if c[t] + c['LECTOR_PRACTIC'] > MIN_VOTES]
-            if not possible_types:
-                raise ValueError("Too few responses")
-            return 'LECTOR_PRACTIC' if len(possible_types) == 2 else possible_types[0]
-
-        results = Result.objects.filter(is_active=True, teacher_n_group__teacher=teacher) \
-            .prefetch_related('answers__question')
-
-        c = Counter([r.teacher_type for r in results])
-        teacher_type = get_type()
-        responses = c['ENG'] if teacher_type == 'ENG' else c['LECTOR'], c['PRACTIC'], c['LECTOR_PRACTIC']
-
-        answers: Dict[str, List[int]] = defaultdict(list)
-        for r in results:
-            for a in r.answers.all():
-                for qn, answ in a.get_answers().items():
-                    answers[qn].append(answ)
-
-        return {
-            'teacher_name': teacher.name,
-            'teacher_photo': teacher.photo,
-            'teacher_type': teacher_type,
-            'responses': responses,
-            'answers': answers,
-        }
-
     def __str__(self):
         return f"{self.teacher_n_group} {self.get_teacher_type_display()}"
 
@@ -133,11 +97,20 @@ class ResultAnswers(models.Model):
     answer_2 = models.PositiveSmallIntegerField('Еще ответ', null=True, blank=True)
 
     def get_answers(self):
-        gen, prac = self.question.name, self.question.name + '_p'
-        if self.result.teacher_type == 'PRACTIC' and self.question.is_two_answers:
+        gen = self.question.name
+        lec, prac = gen + '_l', gen + '_p'
+
+        if self.result.teacher_type == 'ENG' or not self.question.is_two_answers:
+            return {gen: self.answer_1}
+
+        if self.result.teacher_type == 'LECTOR':
+            return {lec: self.answer_1}
+        if self.result.teacher_type == 'PRACTIC':
             return {prac: self.answer_1}
-        res = {gen: self.answer_1, prac: self.answer_2}
-        return {k: v for k, v in res.items() if v is not None}  # filter None values
+        if self.result.teacher_type == 'LECTOR_PRACTIC':
+            return {lec: self.answer_1, prac: self.answer_2}
+
+        raise AssertionError("This shouldn't be raised")
 
     def __str__(self):
         return ''
@@ -147,20 +120,73 @@ class ResultAnswers(models.Model):
         verbose_name_plural = "Ответы на вопросы"
 
 
+# Cached results with known teacher_type and for different faculties
+
 class TeacherFacultyResult(models.Model):
     teacher = models.ForeignKey(Teacher, models.CASCADE, verbose_name='Препод')
     faculty = models.ForeignKey(Faculty, models.CASCADE, verbose_name='Факультет')
-    message_id = models.IntegerField()
+    teacher_type = models.CharField('Тип препода', max_length=20, choices=TEACHER_TYPE.items())
+    message_id = models.IntegerField('Айди сообщения на канале (если запощено)', null=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.teacher_type:
+            self.teacher_type = self.calculate_type()
+
+    @classmethod
+    def calculate_all(cls):
+        TeacherFacultyResult.objects.all().delete()
+        for t, f in Result.objects.all().values_list('teacher_n_group__teacher', 'teacher_n_group__group__faculty').distinct():
+            with suppress(ValueError, IntegrityError):
+                TeacherFacultyResult(teacher_id=t, faculty_id=f).save()
 
     def tg_link(self):
         return self.faculty.poll_result_link.removeprefix('@') + str(self.message_id)
+
+    def answers(self):
+        results = self.results()
+        c = Counter([r.teacher_type for r in results])
+        responses = c['ENG'] if self.teacher_type == 'ENG' else c['LECTOR'], c['PRACTIC'], c['LECTOR_PRACTIC']
+
+        answers: Dict[str, List[int]] = defaultdict(list)
+        for r in results:
+            for a in r.answers.all():
+                for qn, answ in a.get_answers().items():
+                    answers[qn].append(answ)
+
+        return {
+            'responses': responses,
+            'answers': answers,
+        }
+
+    def results(self):
+        return Result.objects.filter(
+            is_active=True,
+            teacher_n_group__teacher=self.teacher,
+            teacher_n_group__group__faculty=self.faculty
+        ).prefetch_related('answers__question')
+
+    def calculate_type(self):
+        min_votes = self.faculty.votes_threshold
+        c = Counter([r.teacher_type for r in self.results()])
+        if self.teacher.is_eng:
+            if c['ENG'] > min_votes:
+                return 'ENG'
+        else:
+            possible_types = [t for t in ('LECTOR', 'PRACTIC') if c[t] + c['LECTOR_PRACTIC'] > min_votes]
+            if len(possible_types) == 2:
+                return 'LECTOR_PRACTIC'
+            elif len(possible_types) == 1:
+                return possible_types[0]
+
+        raise ValueError("Too few responses")
 
     def __str__(self):
         return f"{self.teacher} в {self.faculty}"
 
     class Meta:
+        verbose_name = "Результат препода на факультете"
         unique_together = ('teacher', 'faculty')
-
 
 
 #  защита от спама

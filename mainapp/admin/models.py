@@ -1,14 +1,15 @@
 from adminsortable2.admin import SortableAdminMixin
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.db.models import Exists, OuterRef, Q
 from django.forms import Textarea
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 
-from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, export_groups
+from .utils import ModelAdminByUniver, RelatedFieldListFilterByUniver, export_groups, BooleanFilterBase
 from mainapp.models import Locale, Question, Teacher, Result, ResultAnswers, Group, TeacherNGroup, Faculty, CustomUser, \
-    University
+    University, TeacherFacultyResult
 
 
 @admin.register(CustomUser)
@@ -23,7 +24,7 @@ class CustomUserAdmin(UserAdmin):
         'fields': ('username', 'password1', 'password2', 'univer'),
     }),)
     list_display = ('username', 'univer', 'is_superuser')
-    list_filter = ('univer', )
+    list_filter = ('univer',)
     search_fields = ('username', 'univer')
     ordering = ('-is_superuser', 'univer')
 
@@ -67,15 +68,15 @@ class GroupAdmin(ModelAdminByUniver):
         ('faculty__univer', admin.RelatedOnlyFieldListFilter),
     )
     search_fields = ('name',)
-    actions = (export_groups, )
-    inlines = (TeacherInline, )
+    actions = (export_groups,)
+    inlines = (TeacherInline,)
     ordering = ('name',)
 
 
 @admin.register(Teacher)
 class TeacherAdmin(ModelAdminByUniver):
     class GroupInline(admin.TabularInline):
-        autocomplete_fields = ('group', )
+        autocomplete_fields = ('group',)
         model = TeacherNGroup
         extra = 1
 
@@ -97,33 +98,45 @@ class TeacherAdmin(ModelAdminByUniver):
     def votes_count(self, obj):
         return Result.objects.filter(teacher_n_group__teacher=obj, is_active=True).count()
 
+    @admin.display(description='Постится', boolean=True)
+    def will_post(self, obj):
+        return TeacherFacultyResult.objects.filter(teacher_id=obj.id).exists()
+
+    class WillPostFiler(BooleanFilterBase):
+        title = parameter_name = "Постится"
+
+        def queryset(self, request, queryset):
+            q = Q(Exists(TeacherFacultyResult.objects.filter(teacher_id=OuterRef('id'))))
+            return queryset.filter(q if self.value() == 'True' else ~q)
+
     univer_field_path = "univer"
     readonly_fields = ('rozklad_link', 'slug')
-    list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img', 'votes_count')
+    list_display = ('name', 'lessons', 'cathedras', 'faculties', 'photo_img', 'will_post', 'votes_count')
     list_editable = ('lessons',)
     list_filter = (
         ('groups__faculty', RelatedFieldListFilterByUniver),
         ('univer', admin.RelatedOnlyFieldListFilter),
-        ("photo", admin.EmptyFieldListFilter)
+        ("photo", admin.EmptyFieldListFilter),
+        WillPostFiler
     )
     search_fields = ('name',)
-    inlines = (GroupInline, )
-    ordering = ('name', )
+    inlines = (GroupInline,)
+    ordering = ('name',)
     formfield_overrides = {models.TextField: {'widget': Textarea(attrs={'wrap': 'off', 'rows': 4})}}
 
 
 @admin.register(University)
 class UniversityAdmin(admin.ModelAdmin):
-    list_display = ('name', )
+    list_display = ('name',)
 
 
 @admin.register(Faculty)
 class FacultyAdmin(ModelAdminByUniver):
     univer_field_path = "univer"
-    search_fields = ('name', )
+    search_fields = ('name',)
     list_display = ('name', 'univer', 'poll_result_link')
     list_editable = ('poll_result_link',)
-    list_filter = ('univer', )
+    list_filter = ('univer',)
 
 
 @admin.register(Question)
@@ -154,4 +167,17 @@ class ResultAdmin(admin.ModelAdmin):
         ('teacher_n_group__group', admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = ('teacher_n_group', 'time_start', 'time_finish')
-    inlines = (AnswerInline, )
+    inlines = (AnswerInline,)
+
+
+@admin.register(TeacherFacultyResult)
+class ResultFacultyAdmin(admin.ModelAdmin):
+    @admin.display(description='Позыркать')
+    def view(self, obj):
+        return mark_safe(f'<a href="/pic/{obj.teacher.id}/{obj.faculty.id}">/pic/{obj.teacher.id}/{obj.faculty.id}</a>')
+
+    list_display = ('teacher', 'faculty', 'teacher_type', 'view')
+    list_filter = (
+        ('teacher', admin.RelatedOnlyFieldListFilter),
+        ('faculty', admin.RelatedOnlyFieldListFilter),
+    )

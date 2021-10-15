@@ -1,3 +1,4 @@
+from abc import ABC
 from collections import defaultdict
 
 from django.contrib import admin
@@ -36,3 +37,11 @@ def export_groups(model_admin, request, queryset):
         for fac, groups in fac2group.items()
     ])
     return HttpResponse(f"<pre>{text}</pre>")
+
+
+class BooleanFilterBase(admin.SimpleListFilter, ABC):
+    def lookups(self, request, model_admin):
+        return (
+            (True, 'Да'),
+            (False, 'Нет'),
+        )

@@ -80,10 +80,6 @@ class Teacher(models.Model):
     cathedras = models.TextField("Кафедры", null=True, blank=True)
     lessons = models.TextField("Шо ведет", null=True, blank=True)
 
-    def get_results(self):
-        from mainapp.models import Result
-        return Result.for_teacher(self)
-
     def get_faculties(self):
         return Faculty.objects.filter(group__teacher=self)
 
