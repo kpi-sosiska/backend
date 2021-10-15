@@ -103,7 +103,8 @@ class TeacherAdmin(ModelAdminByUniver):
         return TeacherFacultyResult.objects.filter(teacher_id=obj.id).exists()
 
     class WillPostFiler(BooleanFilterBase):
-        title = parameter_name = "Постится"
+        title = "Постится"
+        parameter_name = "will_post"
 
         def queryset(self, request, queryset):
             q = Q(Exists(TeacherFacultyResult.objects.filter(teacher_id=OuterRef('id'))))
