@@ -136,7 +136,8 @@ class TeacherFacultyResult(models.Model):
     @classmethod
     def calculate_all(cls):
         TeacherFacultyResult.objects.all().delete()
-        for t, f in Result.objects.all().values_list('teacher_n_group__teacher', 'teacher_n_group__group__faculty').distinct():
+        for t, f in Result.objects.all().values_list('teacher_n_group__teacher',
+                                                     'teacher_n_group__group__faculty').distinct():
             with suppress(ValueError, IntegrityError):
                 TeacherFacultyResult(teacher_id=t, faculty_id=f).save()
 
@@ -154,10 +155,10 @@ class TeacherFacultyResult(models.Model):
                 for qn, answ in a.get_answers().items():
                     answers[qn].append(answ)
 
-        return {
-            'responses': responses,
-            'answers': answers,
-        }
+        answers_c = {qn: Counter(a) for qn, a in answers.items()}
+        answers_c = {qn: [c[i] for i in range(1, 6)] for qn, c in answers_c.items()}
+
+        return responses, answers_c
 
     def results(self):
         return Result.objects.filter(
@@ -187,7 +188,6 @@ class TeacherFacultyResult(models.Model):
     class Meta:
         verbose_name = "Результат препода на факультете"
         unique_together = ('teacher', 'faculty')
-
 
 #  защита от спама
 # 1. время заполнения анкеты

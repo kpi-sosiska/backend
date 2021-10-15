@@ -9,6 +9,6 @@ from mainapp.api import router
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url('pic/', pics.views.main),
+    path('pic/<str:teacher>/<str:faculty>/', pics.views.main),
     path('api/', include(router.urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
