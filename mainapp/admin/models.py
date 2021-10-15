@@ -106,7 +106,7 @@ class TeacherAdmin(ModelAdminByUniver):
         title = "Постится"
         parameter_name = "will_post"
 
-        def queryset(self, request, queryset):
+        def queryset_(self, request, queryset):
             q = Q(Exists(TeacherFacultyResult.objects.filter(teacher_id=OuterRef('id'))))
             return queryset.filter(q if self.value() == 'True' else ~q)
 

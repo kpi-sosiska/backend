@@ -1,4 +1,3 @@
-from abc import ABC
 from collections import defaultdict
 
 from django.contrib import admin
@@ -39,9 +38,17 @@ def export_groups(model_admin, request, queryset):
     return HttpResponse(f"<pre>{text}</pre>")
 
 
-class BooleanFilterBase(admin.SimpleListFilter, ABC):
+class BooleanFilterBase(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return (
             (True, 'Да'),
             (False, 'Нет'),
         )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return self.queryset_(request, queryset)
+
+    def queryset_(self, request, queryset):
+        raise NotImplementedError
+
