@@ -7,7 +7,7 @@ from aiogram.dispatcher.webhook import DEFAULT_WEB_PATH, get_new_configured_app
 from aiogram.utils import executor
 from aiohttp import web
 
-from botapp.utils import DeepLinkFilter
+from botapp.utils import DeepLinkFilter, opros_state
 
 TOKEN = os.getenv('BOT_TOKEN')
 storage = MemoryStorage()
@@ -17,8 +17,9 @@ dp = Dispatcher(bot, storage=storage)
 dp.bind_filter(DeepLinkFilter)
 
 # register handlers
-from . import poll, moderate, posting, other_cmds
-from .posting import make_new_post
+from . import moderate, posting
+if opros_state() != '0':
+    from . import poll, other_cmds
 
 
 start_polling = partial(executor.start_polling, dp)
@@ -43,4 +44,4 @@ def get_webapp():
 
 
 async def post_teacher(request):
-    await make_new_post()
+    await posting.make_new_post()
