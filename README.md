@@ -1,5 +1,13 @@
 # backend
 
+# Установка
+
+Пж загуглите команды если вы их не шарите
+
+`git clone https://github.com/kpi-sosiska/backend`  
+`pip install -r requirements.txt`
+
+
 # Запуск
 
 ### Запуск админки:  
