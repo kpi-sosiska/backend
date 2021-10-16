@@ -24,20 +24,17 @@ export const styles = {
 }
 
 const captions_ = {
-    'sufficiency': ['Достатність', 'матеріалів'],
-    'questions_available': ['Надання', 'питань до заліку'],
-    'conformity': ['Відповідність', 'практик лекціям'],
-    'punctuality': ['Пунктуальність'],
+    'cheating_l': ['Не ставить бали', 'без знань', '(лектор)'],
+    'cheating_p': ['Не ставить бали', 'без знань', '(практик)'],
     'comfort': ['Зручність', 'здачі завдань'],
+    'conformity': ['Відповідність', 'практик лекціям'],
+    'find_out_rating': ['Доступ', 'до оцінок'],
     'politeness': ['Ввічливість'],
+    'punctuality': ['Пунктуальність'],
+    'questions_available': ['Надання', 'питань до заліку'],
     'relevance': ['Актуальність', 'матеріалу'],
-    'cheating': ['Не ставить бали', 'без знань'],
-    'timely_informing': ['Своєчасність', 'та достатність', 'інформування'],
-    "objectivity": ['Об\'єктивність', 'оцінювання'],
+    'sufficiency': ['Достатність', 'матеріалів'],
 }
-const lectorPracticSpecial = new Set([
-    'punctuality',    'cheating',    'timely_informing',    "objectivity",
-  ])
 
 export const captions = (type, label) => {
     let label_ = label.replace(' *', '')
