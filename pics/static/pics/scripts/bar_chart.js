@@ -2,6 +2,25 @@
 
 import {styles} from './consts.js'
 
+export const barChart = (id, dataObject, type) => {
+    const canv = document.getElementById(id);
+    if (canv === null) return
+
+    new Chart(canv.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['1', '2', '3', '4', '5'],
+            datasets: [{
+                data: dataObject,
+                backgroundColor: styles[type].backgroundColor,
+                id: 'y-axis-marks'
+            }]
+        },
+        options: getBarChartOptions(type)
+    });
+}
+
+
 const getBarChartOptions = type => (
     {
         responsive: true,
@@ -27,22 +46,3 @@ const getBarChartOptions = type => (
         animation: false
     }
 )
-
-
-export const barChart = (id, dataObject, type) => {
-    const canv = document.getElementById(id);
-    if (canv === null) return
-
-    new Chart(canv.getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: ['1', '2', '3', '4', '5'],
-            datasets: [{
-                data: dataObject,
-                backgroundColor: styles[type].backgroundColor,
-                id: 'y-axis-marks'
-            }]
-        },
-        options: getBarChartOptions(type)
-    });
-}

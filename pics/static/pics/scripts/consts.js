@@ -23,9 +23,8 @@ export const styles = {
     }
 }
 
-const captions_ = {
-    'cheating_l': ['Не ставить бали', 'без знань', '(лектор)'],
-    'cheating_p': ['Не ставить бали', 'без знань', '(практик)'],
+export const captions = {
+    'cheating': ['Не ставить бали', 'без знань'],
     'comfort': ['Зручність', 'здачі завдань'],
     'conformity': ['Відповідність', 'практик лекціям'],
     'find_out_rating': ['Доступ', 'до оцінок'],
@@ -34,14 +33,23 @@ const captions_ = {
     'questions_available': ['Надання', 'питань до заліку'],
     'relevance': ['Актуальність', 'матеріалу'],
     'sufficiency': ['Достатність', 'матеріалів'],
+    'grading_system': ['Об\'єктивість', 'оцінювання'],
 }
 
-export const captions = (type, label) => {
-    let label_ = label.replace(' *', '')
-    let l = captions_[label_].slice()
+export const radialQuestions = {  // questions order important!
+    'eng': ['cheating', 'comfort', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
+    'lector': ['comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
+    'practic': ['comfort', 'find_out_rating', 'politeness', 'punctuality', 'relevance', 'grading_system'],
+    'lector_practic': ['grading_system', 'cheating_l', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'cheating_p'],
+    }
 
-    if (type === 'lector_practic' && lectorPracticSpecial.has(label_))
-        l.push(label.slice(-1) === '*' ? '(практик)' : '(лектор)')
 
-    return l
+
+export function getCaption(q) {
+    const l = q.replace('_l', '').replace('_p', '');
+    let label = captions[l].slice() // copy
+
+    if (q.endsWith('_l')) label.push('(лектор)')
+    if (q.endsWith('_p')) label.push('(практик)')
+    return label
 }
