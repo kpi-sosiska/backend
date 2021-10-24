@@ -1,6 +1,6 @@
 'use strict'
 
-import {captions, getCaption, radialQuestions, styles} from './consts.js'
+import {getAvg, getCaption, radialQuestions, styles} from './consts.js'
 
 export const radialDiagram = (id, dataObject, type) => {
     const canv = document.getElementById(id);
@@ -57,9 +57,3 @@ function getRadialData(obj, type) {
     return [labels, data];
 }
 
-
-function getAvg(answers) {
-    // avg([0, 2, 4, 6, 3]) = (1*0 + 2*2 + 3*4 + 4*6 + 5*3) / (0 + 2 + 4  + 6 + 3)
-    return answers.reduce((sum, value, i) => sum + (i + 1) * value) /
-        answers.reduce((sum, value) => sum + value)
-}

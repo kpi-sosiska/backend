@@ -15,7 +15,7 @@
 
       {% block graphs1 %}
         <div>
-          <p class="mark-percent">{{ want_to_continue_l }}</p>
+          <p class="mark-percent" id="mark-want_to_continue_l"></p>
           <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати</p>
         </div>
       {% endblock %}
@@ -26,11 +26,11 @@
 
       {% block graphs2 %}
         <div>
-          <p class="mark">{{ meaningfulness }}</p>
+          <p class="mark" id="mark-meaningfulness"></p>
           <p class="mark-description">Змістовність лекцій</p>
         </div>
         <div>
-          <p class="mark">{{ grading_system }}</p>
+          <p class="mark" id="mark-grading_system"></p>
           <p class="mark-description">Система оцінювання</p>
         </div>
       {% endblock %}
@@ -40,11 +40,11 @@
     <div class="graphs">
 
       <div>
-        <p class="mark">{{ cheating }}</p>
+        <p class="mark" id="mark-cheating"></p>
         <p class="mark-description">Викладач не ставить бали без знань</p>
       </div>
       <div>
-        <p class="mark">{{ skills }}</p>
+        <p class="mark" id="mark-skills"></p>
         <p class="mark-description">Володіння матеріалом</p>
       </div>
 
@@ -53,7 +53,7 @@
     <div class="graphs respondents">
       <div>
         {% block respondents %}
-          <p class="respondents-count">{{ responses|join:" / " }}</p>
+          <p class="respondents-count" id="responses"></p>
           <p class="respondents-count-description">кількість опитаних <br>
             (лектор/практик/лектор+практик)</p>
         {% endblock %}

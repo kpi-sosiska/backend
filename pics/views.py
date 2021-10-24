@@ -29,10 +29,6 @@ def mock(request):
                'want_to_continue_l': [13, 0, 0, 0, 0],
                'want_to_continue_p': [10, 0, 0, 0, 0]}
 
-    # значения для темплейтов можно попить, а все шо останется пусть процессится джусиком
-    meaningfulness = my_cool_average(answers.pop("meaningfulness"))
-    skills = my_cool_average(answers.pop("skills"))
-
     context = {
         'teacher_name': res.teacher.name,
         'teacher_photo': res.teacher.photo,
@@ -40,14 +36,10 @@ def mock(request):
         'teacher_type': res.teacher_type.lower(),
         'teacher_type_text': TEACHER_TYPE[res.teacher_type],
 
-        'meaningfulness': meaningfulness,
-        'skills': skills,
-
-        'responses': responses,
-
         'json': json.dumps({
             "type": res.teacher_type.lower(),
-            "answers": answers
+            "answers": answers,
+            'responses': responses,
         })
     }
 
@@ -63,10 +55,6 @@ def main(request, teacher, faculty):
     from pprint import pprint
     pprint(answers)
 
-    # значения для темплейтов можно попить, а все шо останется пусть процессится джусиком
-    meaningfulness = my_cool_average(answers.pop("meaningfulness"))
-    skills = my_cool_average(answers.pop("skills"))
-
     context = {
         'teacher_name': res.teacher.name,
         'teacher_photo': res.teacher.photo,
@@ -74,19 +62,11 @@ def main(request, teacher, faculty):
         'teacher_type': res.teacher_type.lower(),
         'teacher_type_text': TEACHER_TYPE[res.teacher_type],
 
-        'meaningfulness': meaningfulness,
-        'skills': skills,
-
-        'responses': responses,
-
         'json': json.dumps({
             "type": res.teacher_type.lower(),
-            "answers": answers
+            "answers": answers,
+            'responses': responses,
         })
     }
 
     return render(request, context['teacher_type'] + '.html', context)
-
-
-def my_cool_average(kek):
-    return sum((i + 1) * v for i, v in enumerate(kek))

@@ -37,10 +37,10 @@ export const captions = {
 }
 
 export const radialQuestions = {  // questions order important!
-    'eng': ['cheating', 'comfort', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
-    'lector': ['comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
-    'practic': ['comfort', 'find_out_rating', 'politeness', 'punctuality', 'relevance', 'grading_system'],
-    'lector_practic': ['grading_system', 'cheating_l', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'cheating_p'],
+    eng: ['cheating', 'comfort', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
+    lector: ['comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
+    practic: ['comfort', 'find_out_rating', 'politeness', 'punctuality', 'relevance', 'grading_system'],
+    lector_practic: ['grading_system', 'cheating_l', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'cheating_p'],
     }
 
 
@@ -52,4 +52,10 @@ export function getCaption(q) {
     if (q.endsWith('_l')) label.push('(лектор)')
     if (q.endsWith('_p')) label.push('(практик)')
     return label
+}
+
+export function getAvg(answers) {
+    // avg([0, 2, 4, 6, 3]) = (1*0 + 2*2 + 3*4 + 4*6 + 5*3) / (0 + 2 + 4  + 6 + 3)
+    return answers.reduce((sum, value, i) => sum + (i + 1) * value) /
+        answers.reduce((sum, value) => sum + value)
 }
