@@ -100,17 +100,9 @@ class ResultAnswers(models.Model):
         gen = self.question.name
         lec, prac = gen + '_l', gen + '_p'
 
-        if self.result.teacher_type == 'ENG' or not self.question.is_two_answers:
-            return {gen: self.answer_1}
-
-        if self.result.teacher_type == 'LECTOR':
-            return {lec: self.answer_1}
-        if self.result.teacher_type == 'PRACTIC':
-            return {prac: self.answer_1}
-        if self.result.teacher_type == 'LECTOR_PRACTIC':
+        if self.question.is_two_answers and self.result.teacher_type == 'LECTOR_PRACTIC':
             return {lec: self.answer_1, prac: self.answer_2}
-
-        raise AssertionError("This shouldn't be raised")
+        return {gen: self.answer_1}
 
     def __str__(self):
         return ''

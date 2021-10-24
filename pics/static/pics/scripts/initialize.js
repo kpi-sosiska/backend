@@ -8,25 +8,23 @@ import {styles} from "./consts.js";
 
 const {type, answers} = teacherData;
 
-if (type === "eng") {
-    barChart('education-quality-lector', answers['quality'], type)
-
-    setLeftMark('mark-cheating', answers['cheating']);
-    setLeftMark('mark-want_to_continue_l', answers['want_to_continue'])
-
-    setResponses(teacherData.responses[0])
-} else {
-    barChart('education-quality-lector', answers['quality_l'], type)
+if (type === "lector_practic") {
+    barChart('education-quality-lector', answers['quality_l'], type)  // todo appears on hover ???
     barChart('education-quality-practic', answers['quality_p'], type)
 
-    setLeftMark('mark-cheating', answers['cheating_l'])
     setLeftMark('mark-want_to_continue_l', answers['want_to_continue_l'])
     setLeftMark('mark-want_to_continue_p', answers['want_to_continue_p'])
 
-    setResponses(teacherData.responses.join(' / '))
+    // todo
+    // setLeftMark('mark-cheating', answers['cheating']);
+} else {
+    barChart('education-quality-lector', answers['quality'], type)
+    setLeftMark('mark-want_to_continue', answers['want_to_continue'])
+    setLeftMark('mark-cheating', answers['cheating']);
 }
 
 barChart('self-assesment', answers['self_rating'], type)
+barChart('education-quality-lector', answers['quality'], type)
 
 setLeftMark('mark-skills', answers['skills'])
 setLeftMark('mark-grading_system', answers['grading_system'])
@@ -34,12 +32,16 @@ setLeftMark('mark-meaningfulness', answers['meaningfulness'])
 
 radialDiagram('radial-diagram', answers, type);
 
+setResponses(teacherData.responses);
+setFormColor();
 
 function setResponses(responses) {
-    document.getElementById("responses").innerText = responses
+    const r = (type === 'eng') ? responses[0] : responses.join(' / ');
+    document.getElementById("responses").innerText = r
 }
 
-
-const form = document.getElementById("form")
-form.style.color = styles[type].fontColor
-form.style.background = styles[type].backdropColor
+function setFormColor() {
+    const form = document.getElementById("form")
+    form.style.color = styles[type].fontColor
+    form.style.background = styles[type].backdropColor
+}
