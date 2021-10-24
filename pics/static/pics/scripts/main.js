@@ -45,7 +45,7 @@ function leftMark(id, value) {
 }
 
 
-export const radialDiagram = (id, obj, type) => {
+function radialDiagram(id, obj, type) {
     const canv = document.getElementById(id);
     if (canv === null) return
 
