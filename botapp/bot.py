@@ -2,7 +2,7 @@ import os
 from functools import partial
 
 from aiogram import Bot, Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.dispatcher.webhook import DEFAULT_WEB_PATH, get_new_configured_app
 from aiogram.utils import executor
 from aiohttp import web
@@ -10,7 +10,12 @@ from aiohttp import web
 from botapp.utils import DeepLinkFilter, opros_state
 
 TOKEN = os.getenv('BOT_TOKEN')
-storage = MemoryStorage()
+storage = RedisStorage2(
+    host=os.getenv('REDIS_HOST'),
+    port=int(os.getenv('REDIS_PORT')),
+    db=os.getenv('REDIS_FSM_DB'),
+    prefix=os.getenv('REDIS_FSM_PREFIX'),
+)
 
 bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot, storage=storage)
