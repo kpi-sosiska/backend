@@ -37,6 +37,7 @@ async def start_posting():
             return
 
         for tfr in tfrs:
+            logging.info(f"post {tfr.teacher.name} {tfr.faculty.name}")
             await _post(tfr)
             await asyncio.sleep(5)
 

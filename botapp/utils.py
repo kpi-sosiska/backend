@@ -48,7 +48,7 @@ async def try_send(func, *args, **kwargs):
 
 def opros_state():
     state = L['opros_state']
-    return '0' if state not in ('1', '2', '3') else state
+    return '0' if state not in ('1', '2', '3', 'posting') else state
 
 
 async def send_other_teachers_in_group(message: types.Message, group: Group):

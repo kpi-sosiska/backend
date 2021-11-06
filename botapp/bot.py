@@ -40,7 +40,8 @@ def get_webapp():
 
     app = get_new_configured_app(dp)
     app.on_startup.append(set_webhook)
-    app.on_startup.append(lambda _: posting.start_posting)
+    if opros_state() == 'posting':
+        app.on_startup.append(lambda _: posting.start_posting)
     # app.on_shutdown.append(on_shutdown)
 
     return app
