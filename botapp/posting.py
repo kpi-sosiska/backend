@@ -1,10 +1,12 @@
+import logging
 import os
+
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garni_studenti.settings')
 django.setup()
 
-from mainapp.models import Faculty, Teacher, TeacherFacultyResult
+from mainapp.models import Faculty, TeacherFacultyResult
 
 import asyncio
 from itertools import cycle
@@ -24,46 +26,54 @@ TEACHER_TYPE = {
 }
 
 
-async def make_new_post():
-    teacher = Teacher.objects.filter(teacherfacultyresult=None).first()  # todo
-    teacher.type = teacher.get_results()['teacher_type']
-    img = _get_img(teacher.slug)
+async def start_posting():
+    while True:
+        # todo optimize
+        faculties = Faculty.objects.all().values_list('id')
+        tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
+                for faculty in faculties]
+        tfrs = filter(None, tfrs)  # remove empty
+        if not tfrs:  # no more prepods to post
+            return
 
-    for faculty in teacher.get_faculties():
-        await _send_post(faculty, teacher, img)
+        for tfr in tfrs:
+            await _post(tfr)
+            await asyncio.sleep(5)
+
+        await asyncio.sleep(60 * 60)  # 1 hour
 
 
-async def _send_post(faculty, teacher, img):
-    cathedras = ' '.join([f"#{cathedra}" for cathedra in teacher.cathedras.split('\n')])
+async def _post(tfr):
+    cathedras = ' '.join([f"#{cathedra}" for cathedra in tfr.teacher.cathedras.split('\n')])
     lessons = '\n'.join([f"{mark} {lesson};" for lesson, mark
-                         in zip(teacher.lessons.split('\n'), cycle(('🔹', '🔸')))])
+                         in zip(tfr.teacher.lessons.split('\n'), cycle(('🔹', '🔸')))])
 
-    teacher_type = TEACHER_TYPE[teacher.type]
-    teacher_name = teacher.name
-    if teacher.univer == 1:  # kpi
-        teacher_name = hlink(teacher.name, 'http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v=' + teacher.id)
+    teacher_type = TEACHER_TYPE[tfr.teacher_type]
+    teacher_name = tfr.teacher.name
+    if tfr.teacher.univer == 1:  # kpi
+        teacher_name = hlink(tfr.teacher.name, 'http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v=' + tfr.teacher.id)
 
-    text = f"{hide_link(teacher.id)}" \
+    text = f"{hide_link(tfr.teacher.id)}" \
            f"{cathedras} {teacher_type} {teacher_name}" \
            f"\n\n{lessons}"
-    return await bot.send_photo(faculty.poll_result_link, img, caption=text)
+
+    img = await _get_img(tfr.teacher_id, tfr.faculty_id)
+    await bot.send_photo(tfr.faculty.poll_result_link, img, caption=text)
 
 
-@dp.channel_post_handler()
+@dp.message_handler(content_types=types.ContentTypes.PHOTO)
 async def new_post_handler(message: types.Message):
     if not message.caption_entities or not message.sender_chat:
         return
 
     teacher_id = message.caption_entities[0].url
-    faculty_chat = '@' + message.sender_chat.username
-
-    try:
-        faculty = Faculty.objects.get(poll_result_link=faculty_chat)
-    except Faculty.DoesNotExist:
+    tfr = TeacherFacultyResult.objects.filter(teacher_id=teacher_id,
+                                              faculty__poll_result_link=f'@{message.sender_chat.username}').first()
+    if not tfr:
+        logging.info(f"new_post_handler tfr not found for {teacher_id=} {message.sender_chat.username=}")
         return
 
-    tfr = TeacherFacultyResult(teacher_id=teacher_id, faculty=faculty,
-                               message_id=message.message_id)
+    tfr.message_id = message.forward_from_message_id
     tfr.save()
 
     for comment in tfr.teacher.get_comments():
@@ -71,23 +81,19 @@ async def new_post_handler(message: types.Message):
         await asyncio.sleep(1.5)
 
 
-async def _get_img(teacher_id):
+async def _get_img(teacher_id, faculty_id):
     browser = await launch()
     page = await browser.newPage()
     await page.setViewport(dict(width=1500, height=1500))
-    await page.goto('https://sova.kpi.in.ua/pic/' + teacher_id)
+    await page.goto(f'https://sova.kpi.in.ua/pic/{teacher_id}/{faculty_id}')
     img = await page.screenshot(type='png')
     await browser.close()
     return img
 
 
 if __name__ == '__main__':
-    teacher = Teacher.objects.get(id='d1bfd5d9-efde-40af-992e-7f8e798a5f69')
-    faculty = teacher.get_faculties()[0]
-
     async def test():
-        img = await _get_img(teacher.id)
-        await _send_post(faculty, teacher, img)
+        tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link='@svintestchann').first()
+        await _post(tfr)
 
-
-    executor.start(dp, test())
+    executor.start_polling(dp, on_startup=[lambda _: test()])

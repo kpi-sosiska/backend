@@ -40,13 +40,8 @@ def get_webapp():
         return bot.set_webhook(f"https://{os.getenv('BOT_DOMAIN')}{DEFAULT_WEB_PATH}")
 
     app = get_new_configured_app(dp)
-    app.add_routes([web.get('/post', post_teacher)])  # todo maybe posting signal here
-
     app.on_startup.append(set_webhook)
+    app.on_startup.append(lambda _: posting.start_posting)
     # app.on_shutdown.append(on_shutdown)
 
     return app
-
-
-async def post_teacher(request):
-    await posting.make_new_post()
