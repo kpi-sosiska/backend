@@ -43,7 +43,7 @@ def _get_comment():
     q = Result.objects.filter(is_active=True, open_question_answer__isnull=False,
                               open_answer_moderate__isnull=True, teacher_n_group__teacher__teacherfacultyresult__isnull=False)
     rand_id = random.randint(0, q.count())
-    return q.filter(id__gte=rand_id).first()
+    return q[rand_id]
 
 
 def _keyboard(id_):
