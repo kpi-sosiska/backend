@@ -15,9 +15,7 @@ from itertools import cycle
 from aiogram import types
 from aiogram.utils import executor
 from aiogram.utils.markdown import hide_link, hlink
-from aiogram.types.chat_member import ChatMemberStatus
 from aiogram.utils.exceptions import ChatNotFound
-from aiogram.dispatcher.handler import SkipHandler
 from pyppeteer import launch
 
 from botapp.bot import dp, bot
@@ -97,37 +95,33 @@ async def _get_img(teacher_id, faculty_id):
     return img
 
 
-@dp.message_handler(commands=('check',), state='*')
+@dp.message_handler(lambda m: m.chat.id != L['admin_chat_id'], commands=['check'], state='*')
 async def check_bot_in_chats(message: types.Message):
-    if message.chat.id != L['admin_chat_id']:
-        raise SkipHandler
-    
-    faculties = Faculty.objects.all()
-    for faculty in faculties:
+    async def check_faculty(channel):
         try:
-            bot_in_poll_result_channel = await bot.get_chat_member(faculty.poll_result_link, bot.id)
+            member = await bot.get_chat_member(channel, bot.id)
         except ChatNotFound:
-            await message.reply(f'Канала {faculty.name} нету')
-            continue
-        
-        if bot_in_poll_result_channel.status != ChatMemberStatus.ADMINISTRATOR:
-            await message.reply(f'Бота нету в канале {faculty.name}')
-            continue
-        if not bot_in_poll_result_channel.can_post_messages:
-            await message.reply(f'Бот не имеет права постить в {faculty.name}')
-            continue
-        
-        faculty_channel = await bot.get_chat(faculty.poll_result_link)
+            return f'Канала @{channel} нету'
+
+        if member.status != types.ChatMemberStatus.ADMINISTRATOR:
+            return f'Бота нету в канале @{channel}'
+        if not member.can_post_messages:
+            return f'Бот не имеет права постить в @{channel}'
+
+        linked_chat = (await bot.get_chat(channel)).linked_chat_id
         try:
-            bot_in_comments_faculty_chat = await bot.get_chat_member(faculty_channel.linked_chat_id, bot.id)
+            member = await bot.get_chat_member(linked_chat, bot.id)
         except ChatNotFound:
-            await message.reply(f'Чата канала {faculty.name} нету')
-            continue
-        if not bot_in_comments_faculty_chat.can_send_messages:
-            await message.reply(f'Бот не имеет права писать в чат в {faculty.name}')
-            continue
-    
-    await message.reply('Проверка окончена')
+            return f'Чата для комментариев у канала @{channel} нету'
+        if not member.can_send_messages:
+            return f'Бот не имеет права писать в чат для комментариев для @{channel}'
+
+        return "OK"
+
+    await message.reply("\n".join([
+        f"<b>{faculty.name}</b>: " + await check_faculty(faculty.poll_result_link)
+        for faculty in Faculty.objects.all()
+    ]))
 
 
 if __name__ == '__main__':
