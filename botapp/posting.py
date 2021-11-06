@@ -7,6 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garni_studenti.settings')
 django.setup()
 
 from mainapp.models import Faculty, TeacherFacultyResult
+from mainapp.models import Locale as L
 
 import asyncio
 from itertools import cycle
@@ -14,6 +15,9 @@ from itertools import cycle
 from aiogram import types
 from aiogram.utils import executor
 from aiogram.utils.markdown import hide_link, hlink
+from aiogram.types.chat_member import ChatMemberStatus
+from aiogram.utils.exceptions import ChatNotFound
+from aiogram.dispatcher.handler import SkipHandler
 from pyppeteer import launch
 
 from botapp.bot import dp, bot
@@ -91,6 +95,39 @@ async def _get_img(teacher_id, faculty_id):
     img = await page.screenshot(type='png')
     await browser.close()
     return img
+
+
+@dp.message_handler(commands=('check',), state='*')
+async def check_bot_in_chats(message: types.Message):
+    if message.chat.id != L['admin_chat_id']:
+        raise SkipHandler
+    
+    faculties = Faculty.objects.all()
+    for faculty in faculties:
+        try:
+            bot_in_poll_result_channel = await bot.get_chat_member(faculty.poll_result_link, bot.id)
+        except ChatNotFound:
+            await message.reply(f'Канала {faculty.name} нету')
+            continue
+        
+        if bot_in_poll_result_channel.status != ChatMemberStatus.ADMINISTRATOR:
+            await message.reply(f'Бота нету в канале {faculty.name}')
+            continue
+        if not bot_in_poll_result_channel.can_post_messages:
+            await message.reply(f'Бот не имеет права постить в {faculty.name}')
+            continue
+        
+        faculty_channel = await bot.get_chat(faculty.poll_result_link)
+        try:
+            bot_in_comments_faculty_chat = await bot.get_chat_member(faculty_channel.linked_chat_id, bot.id)
+        except ChatNotFound:
+            await message.reply(f'Чата канала {faculty.name} нету')
+            continue
+        if not bot_in_comments_faculty_chat.can_send_messages:
+            await message.reply(f'Бот не имеет права писать в чат в {faculty.name}')
+            continue
+    
+    await message.reply('Проверка окончена')
 
 
 if __name__ == '__main__':
