@@ -36,7 +36,7 @@ async def moderate_handler(query: types.CallbackQuery, callback_data: dict):
                                                  reply_markup=start_kb)
         return await query.answer()
 
-    await query.message.edit_text(censure(comment), reply_markup=_keyboard(comment.id))
+    await query.message.edit_text(censure(comment.open_question_answer), reply_markup=_keyboard(comment.id))
 
 
 def _get_comment():
