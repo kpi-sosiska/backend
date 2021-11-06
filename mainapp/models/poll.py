@@ -1,15 +1,12 @@
-import re
+from collections import Counter, defaultdict
 from contextlib import suppress
-from functools import reduce
+from typing import Dict, List
 
 from django.db import models, transaction, IntegrityError
 from django.db.models import Q
 from django.utils import timezone
 
-from mainapp.models.other import Locale
 from mainapp.models.teachers import Faculty, TEACHER_TYPE, Teacher, TeacherNGroup
-from collections import Counter, defaultdict
-from typing import Dict, List
 
 
 class Question(models.Model):
@@ -75,12 +72,6 @@ class Result(models.Model):
                     answers.append(None)
                 ResultAnswers.objects.create(result=self, question_id=question_id,
                                              answer_1=answers[0], answer_2=answers[1])
-
-    @property
-    def censored_answer(self):
-        bad_words = Locale['bad_words'].split(' ')
-        return reduce(lambda res, bad_word: re.sub(bad_word, '*' * len(bad_word), res, flags=re.IGNORECASE),
-                      bad_words, self.open_question_answer)
 
     def __str__(self):
         return f"{self.teacher_n_group} {self.get_teacher_type_display()}"

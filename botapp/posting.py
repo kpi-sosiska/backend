@@ -17,6 +17,7 @@ from aiogram.utils.markdown import hide_link, hlink
 from pyppeteer import launch
 
 from botapp.bot import dp, bot
+from botapp.utils import censure
 
 TEACHER_TYPE = {
     'ENG': '#англ',
@@ -78,7 +79,7 @@ async def new_post_handler(message: types.Message):
     tfr.save()
 
     for comment in tfr.teacher.get_comments():
-        await message.reply(comment)
+        await message.reply(censure(comment))
         await asyncio.sleep(1.5)
 
 

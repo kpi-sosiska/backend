@@ -8,6 +8,7 @@ from aiogram.utils.callback_data import CallbackData
 
 from mainapp.models import Locale as L, Result
 from .bot import dp, bot
+from .utils import censure
 
 cb = CallbackData('moderate', 'id', 'status')
 kb = {'🤷': 'skip', '👍': 'ok', '👎': 'neok'}.items()
@@ -35,7 +36,7 @@ async def moderate_handler(query: types.CallbackQuery, callback_data: dict):
                                                  reply_markup=start_kb)
         return await query.answer()
 
-    await query.message.edit_text(comment.censored_answer, reply_markup=_keyboard(comment.id))
+    await query.message.edit_text(censure(comment), reply_markup=_keyboard(comment.id))
 
 
 def _get_comment():
