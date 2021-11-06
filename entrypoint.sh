@@ -1,4 +1,5 @@
 #!/bin/bash
+python manage.py collectstatic
 
 if [[ -v BOT_TOKEN ]]; then
     if [[ -v BOT_DOMAIN ]]; then
