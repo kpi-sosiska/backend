@@ -7,6 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garni_studenti.settings')
 django.setup()
 
 from mainapp.models import Faculty, TeacherFacultyResult
+from mainapp.models import Locale as L
 
 import asyncio
 from itertools import cycle
@@ -14,6 +15,7 @@ from itertools import cycle
 from aiogram import types
 from aiogram.utils import executor
 from aiogram.utils.markdown import hide_link, hlink
+from aiogram.utils.exceptions import ChatNotFound
 from pyppeteer import launch
 
 from botapp.bot import dp, bot
@@ -91,6 +93,35 @@ async def _get_img(teacher_id, faculty_id):
     img = await page.screenshot(type='png')
     await browser.close()
     return img
+
+
+@dp.message_handler(lambda m: m.chat.id != L['admin_chat_id'], commands=['check'], state='*')
+async def check_bot_in_chats(message: types.Message):
+    async def check_faculty(channel):
+        try:
+            member = await bot.get_chat_member(channel, bot.id)
+        except ChatNotFound:
+            return f'Канала @{channel} нету'
+
+        if member.status != types.ChatMemberStatus.ADMINISTRATOR:
+            return f'Бота нету в канале @{channel}'
+        if not member.can_post_messages:
+            return f'Бот не имеет права постить в @{channel}'
+
+        linked_chat = (await bot.get_chat(channel)).linked_chat_id
+        try:
+            member = await bot.get_chat_member(linked_chat, bot.id)
+        except ChatNotFound:
+            return f'Чата для комментариев у канала @{channel} нету'
+        if not member.can_send_messages:
+            return f'Бот не имеет права писать в чат для комментариев для @{channel}'
+
+        return "OK"
+
+    await message.reply("\n".join([
+        f"<b>{faculty.name}</b>: " + await check_faculty(faculty.poll_result_link)
+        for faculty in Faculty.objects.all()
+    ]))
 
 
 if __name__ == '__main__':
