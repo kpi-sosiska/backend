@@ -80,7 +80,7 @@ async def new_post_handler(message: types.Message):
     tfr.message_id = message.forward_from_message_id
     tfr.save()
 
-    for comment in tfr.teacher.get_comments():
+    for comment in tfr.teacher.get_comments(tfr.faculty_id):
         await message.reply(censure(comment))
         await asyncio.sleep(1.5)
 
