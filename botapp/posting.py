@@ -15,7 +15,7 @@ from itertools import cycle
 from aiogram import types
 from aiogram.utils import executor
 from aiogram.utils.markdown import hide_link, hlink
-from aiogram.utils.exceptions import ChatNotFound, Unauthorized
+from aiogram.utils.exceptions import ChatNotFound, Unauthorized, ChatIdIsEmpty
 from pyppeteer import launch
 
 from botapp.bot import dp, bot
@@ -113,7 +113,7 @@ async def check_bot_in_chats(message: types.Message):
         linked_chat = (await bot.get_chat(channel)).linked_chat_id
         try:
             member = await bot.get_chat_member(linked_chat, bot.id)
-        except ChatNotFound:
+        except (ChatNotFound, ChatIdIsEmpty):
             return f'Чата для комментариев у канала {channel} нету'
         except Unauthorized:
             return f'Бота нету в чате для комментариев у канала {channel}'
