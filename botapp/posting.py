@@ -101,24 +101,24 @@ async def check_bot_in_chats(message: types.Message):
         try:
             member = await bot.get_chat_member(channel, bot.id)
         except ChatNotFound:
-            return f'Канала @{channel} нету'
+            return f'Канала {channel} нету'
         except Unauthorized:
-            return f'Бота нету в канале @{channel}'
+            return f'Бота нету в {channel}'
 
         if member.status != types.ChatMemberStatus.ADMINISTRATOR:
-            return f'Бота нету в канале @{channel}'
+            return f'Бота нету в {channel}'
         if not member.can_post_messages:
-            return f'Бот не имеет права постить в @{channel}'
+            return f'Бот не имеет права постить в {channel}'
 
         linked_chat = (await bot.get_chat(channel)).linked_chat_id
         try:
             member = await bot.get_chat_member(linked_chat, bot.id)
         except ChatNotFound:
-            return f'Чата для комментариев у канала @{channel} нету'
+            return f'Чата для комментариев у канала {channel} нету'
         except Unauthorized:
-            return f'Бота нету в чате для комментариев у канала @{channel}'
+            return f'Бота нету в чате для комментариев у канала {channel}'
         if not getattr(member, 'can_send_messages', True):
-            return f'Бот не имеет права писать в чат для комментариев для @{channel}'
+            return f'Бот не имеет права писать в чат для комментариев для {channel}'
 
         return "OK"
 
