@@ -117,6 +117,8 @@ async def check_bot_in_chats(message: types.Message):
             return f'Чата для комментариев у канала @{channel} нету'
         except Unauthorized:
             return f'Бота нету в чате для комментариев у канала @{channel}'
+        if member.status not in (types.ChatMemberStatus.MEMBER, types.ChatMemberStatus.ADMINISTRATOR):
+            return f'Бота нету в чате для комментариев у канала @{channel}'
         if not member.can_send_messages:
             return f'Бот не имеет права писать в чат для комментариев для @{channel}'
 
