@@ -95,7 +95,7 @@ async def _get_img(teacher_id, faculty_id):
     return img
 
 
-@dp.message_handler(lambda m: m.chat.id != L['admin_chat_id'], commands=['check'], state='*')
+@dp.message_handler(lambda m: str(m.chat.id) == L['admin_chat_id'], commands=['check'], state='*')
 async def check_bot_in_chats(message: types.Message):
     async def check_faculty(channel):
         try:
@@ -117,8 +117,8 @@ async def check_bot_in_chats(message: types.Message):
             return f'Чата для комментариев у канала {channel} нету'
         except Unauthorized:
             return f'Бота нету в чате для комментариев у канала {channel}'
-        if not getattr(member, 'can_send_messages', True):
-            return f'Бот не имеет права писать в чат для комментариев для {channel}'
+        if not member.can_send_messages:
+            return f"Бот не имеет права писать в чат для комментариев для {channel}"
 
         return "OK"
 

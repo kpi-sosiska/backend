@@ -5,6 +5,7 @@ from aiogram import types
 from aiogram.dispatcher.handler import SkipHandler
 from aiogram.utils import exceptions
 from aiogram.utils.callback_data import CallbackData
+from aiogram.utils.markdown import italic
 
 from mainapp.models import Locale as L, Result
 from .bot import dp, bot
@@ -29,21 +30,21 @@ async def moderate_handler(query: types.CallbackQuery, callback_data: dict):
     if status != 'skip':
         Result.objects.filter(id=id_).update(open_answer_moderate=status == 'ok')
 
-    comment = _get_comment()
+    comment, comments_count = _get_comment()
     if comment is None:
         with suppress(exceptions.MessageNotModified):
             return await query.message.edit_text("Комментарии пока что закончились. Нажми кнопку что бы обновить",
                                                  reply_markup=start_kb)
         return await query.answer()
 
-    await query.message.edit_text(censure(comment.open_question_answer), reply_markup=_keyboard(comment.id))
+    await query.message.edit_text(f"{censure(comment.open_question_answer)}\n\n{italic(f'Осталось {comments_count} необработанных комментариев.')}", reply_markup=_keyboard(comment.id))
 
 
 def _get_comment():
     q = Result.objects.filter(is_active=True, open_question_answer__isnull=False,
                               open_answer_moderate__isnull=True, teacher_n_group__teacher__teacherfacultyresult__isnull=False)
     rand_id = random.randint(0, q.count())
-    return q[rand_id]
+    return q[rand_id], q.count()
 
 
 def _keyboard(id_):
