@@ -42,8 +42,11 @@ async def moderate_handler(query: types.CallbackQuery, callback_data: dict):
 def _get_comment():
     q = Result.objects.filter(is_active=True, open_question_answer__isnull=False,
                               open_answer_moderate__isnull=True, teacher_n_group__teacher__teacherfacultyresult__isnull=False)
-    rand_id = random.randint(0, q.count())
-    return q[rand_id], q.count()
+    count = q.count()
+    if count == 0:
+        return None, 0
+    rand_id = random.randint(0, count)
+    return q[rand_id], count
 
 
 def _keyboard(id_):
