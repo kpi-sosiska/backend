@@ -10,7 +10,7 @@
     display: grid;
     grid-template-columns: 400px 1fr;
     grid-column-gap: 50px;
-    padding: 80px;
+    padding: 95px;
     height: 100%;
     box-sizing: border-box;
 }
