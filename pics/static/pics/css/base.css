@@ -8,32 +8,56 @@
 
 .main {
     display: grid;
-    grid-template-columns: 32% 68%;
-    padding: 100px 100px 0px 100px;
+    grid-template-columns: 400px 1fr;
+    grid-column-gap: 50px;
+    padding: 80px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.left-info {
+    display: flex;
+    flex-flow: column nowrap;
 }
 
 .right-info {
-    padding: 0 0 0 50px;
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-between;
+    box-sizing: border-box;
 }
 
 .teacher-face-and-name {
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    text-align: left;
 }
 
 .teacher-face {
-    height: auto;
+    height: 100%;
     width: 100%;
+    object-fit: cover;
+    z-index: 10;
+    position: relative;
 }
 
 .img-container {
-    width: 390px;
-    height: 390px;
+    width: 400px;
+    height: 400px;
     overflow: hidden;
     align-self: center;
+    position: relative;
+}
+
+.background-teacher-face {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+    z-index: 5;
 }
 
 .teacher-name {
@@ -52,21 +76,20 @@
 
 
 .radial {
-    height: 758px;
+    height: 750px;
+    margin-top: 50px;
 }
 
 .general-numbers {
     display: flex;
     flex-flow: column nowrap;
-    padding-top: 30px;
+    padding-top: 50px;
 }
 
 
 .graphs {
     display: flex;
     justify-content: space-around;
-    margin: 15px 0;
-
 }
 
 .helper-div {
@@ -83,21 +106,29 @@
 }
 
 
+.percent-mark-container {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 55px;
+}
+
 .mark {
     font-weight: bold;
     font-size: 70px;
 }
+
 .mark-percent {
     font-weight: bold;
-    font-size: 75px;
+    font-size: 90px;
 }
+
 .mark-percent:after {
     content: '%'
 }
 
 .mark-description {
-    font-size: 24px;
-    width: 190px;
+    font-size: 28px;
+    line-height: 115%;
 }
 
 
@@ -105,22 +136,21 @@
     display: flex;
     text-align: left;
     justify-content: flex-start;
-    padding-left: 30px;
 }
 .respondents-count {
     font-weight: bold;
-    font-size: 40px;
+    font-size: 67px;
 }
 
 .respondents-count-description {
-    font-size: 24px;
+    font-size: 28px;
 }
 
 
 .semester-and-year {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    height: 70px;
+    text-align: left;
+    height: 30px;
     font-size: 30px;
+    margin: auto 0 0;
 }
+

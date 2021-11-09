@@ -1,8 +1,10 @@
 {% extends 'base_.html' %}
+{% load static %}
 
 {% block left %}
   <div class="teacher-face-and-name">
     <div class="img-container">
+      <img class="background-teacher-face" src="{% static 'pics/cat.jpg' %}" alt="#" />
       <img class="teacher-face" src="{{ teacher_photo }}" alt="teacher's face">
     </div>
     <h1 class="teacher-name">{{ teacher_name }}</h1>
@@ -11,18 +13,15 @@
 
   <div class="general-numbers">
 
-    <div class="graphs">
 
       {% block graphs1 %}
-        <div>
+        <div class="percent-mark-container">
           <p class="mark-percent" id="mark-want_to_continue"></p>
           <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати</p>
         </div>
       {% endblock %}
 
-    </div>
 
-    <div class="graphs">
 
       {% block graphs2 %}
         <div>
@@ -35,27 +34,23 @@
         </div>
       {% endblock %}
 
-    </div>
 
-    <div class="graphs">
-
-      <div>
-        <p class="mark" id="mark-cheating"></p>
+    {% block graphs3 %}
+      <div class="percent-mark-container">
+        <p class="mark-percent" id="mark-cheating"></p>
         <p class="mark-description">Викладач не ставить бали без знань</p>
       </div>
-      <div>
-        <p class="mark" id="mark-skills"></p>
-        <p class="mark-description">Володіння матеріалом</p>
-      </div>
+<!--      <div>-->
+<!--        <p class="mark" id="mark-skills"></p>-->
+<!--        <p class="mark-description">Володіння матеріалом</p>-->
+<!--      </div>-->
+    {% endblock %}
 
-    </div>
-
-    <div class="graphs respondents">
+    <div class="respondents">
       <div>
         {% block respondents %}
           <p class="respondents-count" id="responses"></p>
-          <p class="respondents-count-description">кількість опитаних <br>
-            (лектор/практик/лектор+практик)</p>
+          <p class="respondents-count-description">кількість опитаних</p>
         {% endblock %}
       </div>
     </div>
@@ -69,7 +64,7 @@
     {% block graphs4 %}
       <div class="graph-education">
         <div class="helper-div">
-          <canvas class="graph" id="education-quality"></canvas>
+          <canvas id="education-quality"></canvas>
         </div>
         <p class="education-description">Задоволення викладанням дисципліни</p>
       </div>
@@ -78,7 +73,7 @@
 
     <div class="graph-education">
       <div class="helper-div">
-        <canvas class="graph" id="self-rating"></canvas>
+        <canvas id="self-rating"></canvas>
       </div>
       <p class="education-description">Самооцінка власних знань після проходження курсу</p>
     </div>

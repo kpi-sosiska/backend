@@ -2,44 +2,44 @@
 
 
 {% block style %}
-  .main {
-  padding: 80px 80px 0px 80px;
   }
   .right-info {
-  padding: 0 0 70px 30px;
+  padding: 0 0 0 30px;
   }
+
   .helper-div {
   height: 300px;
-  }
-  .graph-bars {
-  margin-bottom: -55px;
   }
 {% endblock %}
 
 
 {% block graphs1 %}
-  <div>
-    <p class="mark-percent" id="mark-want_to_continue_l"></p>
-    <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати як <b>ЛЕКТОР</b>
-    </p>
-  </div>
-  <div>
-    <p class="mark-percent" id="mark-want_to_continue_p"></p>
-    <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати як <b>ПРАКТИК</b>
-    </p>
+  <div class="percent-mark-container">
+    <p class="mark-percent" id="mark-want_to_continue"></p>
+    <p class="mark-description">опитаних хочуть, щоб викладач продовжував викладати</p>
   </div>
 {% endblock %}
+
+{% block graphs2 %}
+{% endblock %}
+
+  {% block graphs3 %}
+    <div class="percent-mark-container">
+      <p class="mark-percent" id="mark-cheating"></p>
+      <p class="mark-description">Викладач не ставить бали <br /> без знань</p>
+    </div>
+  {% endblock %}
 
 {% block graphs4 %}
   <div class="graph-education">
     <div class="helper-div">
-      <canvas class="graph" id="education-quality_l"></canvas>
+      <canvas id="education-quality_l"></canvas>
     </div>
     <p class="education-description">Задоволення викладанням дисципліни (лектор)</p>
   </div>
   <div class="graph-education">
     <div class="helper-div">
-      <canvas class="graph" id="education-quality_p"></canvas>
+      <canvas id="education-quality_p"></canvas>
     </div>
     <p class="education-description">Задоволення викладанням дисципліни (практик)</p>
   </div>

@@ -34,13 +34,15 @@ export const captions = {
     'relevance': ['Актуальність', 'матеріалу'],
     'sufficiency': ['Достатність', 'матеріалів'],
     'grading_system': ['Об\'єктивість', 'оцінювання'],
+    'meaningfulness': ['Змістовність', 'лекцій'],
+    'skills': ['Володіння', 'матеріалом']
 }
 
 export const radialQuestions = {  // questions order important!
     eng: ['cheating', 'comfort', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
     lector: ['comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
-    practic: ['comfort', 'find_out_rating', 'politeness', 'punctuality', 'relevance', 'grading_system'],
-    lector_practic: ['grading_system', 'cheating_l', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'cheating_p'],
+    practic: ['comfort', 'find_out_rating', 'politeness', 'punctuality', 'relevance', 'grading_system', 'skills'],
+    lector_practic: ['grading_system', 'meaningfulness', 'skills', 'cheating_l', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'cheating_p'],
 }
 
 

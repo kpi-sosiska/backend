@@ -6,27 +6,30 @@ import {getAvg, getCaption, radialQuestions, styles} from "./consts.js";
 const {type, answers} = teacherData;
 
 function main() {
+
+    console.log(answers, type);
+
     if (type === "lector_practic") {
         barChart('education-quality_l', answers['quality_l'], type)
         barChart('education-quality_p', answers['quality_p'], type)
 
-        leftMark('mark-want_to_continue_l', answers['want_to_continue_l'])
-        leftMark('mark-want_to_continue_p', answers['want_to_continue_p'])
+        leftMark('mark-want_to_continue', [...answers['want_to_continue_l'], ...answers['want_to_continue_p']])
 
-        // todo
-        // leftMark('mark-cheating', answers['cheating']);
+        leftMark('mark-cheating', answers['cheating']);
     } else {
         barChart('education-quality-lector', answers['quality'], type)
         leftMark('mark-want_to_continue', answers['want_to_continue'])
         leftMark('mark-cheating', answers['cheating']);
+
+        leftMark('mark-grading_system', answers['grading_system'])
+        leftMark('mark-meaningfulness', answers['meaningfulness'])
     }
 
     barChart('self-rating', answers['self_rating'], type)
     barChart('education-quality', answers['quality'], type)
 
-    leftMark('mark-skills', answers['skills'])
-    leftMark('mark-grading_system', answers['grading_system'])
-    leftMark('mark-meaningfulness', answers['meaningfulness'])
+//    leftMark('mark-skills', answers['skills'])
+
 
     radialDiagram('radial-diagram', answers, type);
 
@@ -134,7 +137,7 @@ function barChart(id, dataObject, type) {
 }
 
 function setResponses(responses) {
-    const r = (type === 'eng') ? responses[0] : responses.join(' / ');
+    const r = responses.reduce((prev, curr) => prev + curr) //sum of all responses
     document.getElementById("responses").innerText = r
 }
 

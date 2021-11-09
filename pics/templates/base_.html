@@ -21,6 +21,9 @@
     <div class="main">
       <div class="left-info">
         {% block left %}{% endblock %}
+        <div class="semester-and-year">
+          {% block semestr %} {% endblock %}
+        </div>
       </div>
 
       <div class="right-info">
@@ -30,9 +33,7 @@
         {% block right %}{% endblock %}
       </div>
     </div>
-    <div class="semester-and-year">
-      <p>{% block semestr %} {% endblock %}</p>
-    </div>
+
 
   </div>
 
