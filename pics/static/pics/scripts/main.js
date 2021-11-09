@@ -1,6 +1,6 @@
 'use strict'
 
-import {getAvg, getCaption, radialQuestions, styles} from "./consts.js";
+import {getCaption, radialQuestions, styles} from "./consts.js";
 
 
 const {type, answers} = teacherData;
@@ -13,9 +13,8 @@ function main() {
         barChart('education-quality_l', answers['quality_l'], type)
         barChart('education-quality_p', answers['quality_p'], type)
 
-        leftMark('mark-want_to_continue', [...answers['want_to_continue_l'], ...answers['want_to_continue_p']])
-
-        leftMark('mark-cheating', answers['cheating']);
+        leftMark('mark-want_to_continue', mergeAnswers(answers['want_to_continue_l'], answers['want_to_continue_p']))
+        leftMark('mark-cheating', mergeAnswers(answers['cheating_l'], answers['cheating_p']))
     } else {
         barChart('education-quality-lector', answers['quality'], type)
         leftMark('mark-want_to_continue', answers['want_to_continue'])
@@ -35,7 +34,7 @@ function leftMark(id, value) {
     const el = document.getElementById(id);
     if (el === null) return
 
-    value = getAvg(value) / 5;
+    value = getAvg(value) / value.length;
 
     el.style.color = `hsl(${value ** 2 * 120}deg, 100%, 45%)`
     el.innerHTML = Math.round(value * 100).toString();
@@ -140,5 +139,18 @@ function setFormColor() {
     form.style.color = styles[type].fontColor
     form.style.background = styles[type].backdropColor
 }
+
+
+function getAvg(answers) {
+    // avg([0, 2, 4, 6, 3]) = (1*0 + 2*2 + 3*4 + 4*6 + 5*3) / (0 + 2 + 4  + 6 + 3)
+    return answers.reduce((sum, value, i) => sum + (i + 1) * value) /
+        answers.reduce((sum, value) => sum + value)
+}
+
+function mergeAnswers(a1, a2) {
+    console.assert(a1.length === a2.length);
+    return a1.copy().map((v, i) => v + a2[i]);
+}
+
 
 main();
