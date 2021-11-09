@@ -2,7 +2,7 @@ import os
 from functools import partial
 
 from aiogram import Bot, Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage import memory, redis
 from aiogram.dispatcher.webhook import DEFAULT_WEB_PATH, get_new_configured_app
 from aiogram.utils import executor
 from aiohttp import web
@@ -10,7 +10,11 @@ from aiohttp import web
 from botapp.utils import DeepLinkFilter, opros_state
 
 TOKEN = os.getenv('BOT_TOKEN')
-storage = MemoryStorage()
+
+if os.getenv('REDIS_HOST'):
+    storage = redis.RedisStorage2(host=os.getenv('REDIS_HOST'))
+else:
+    storage = memory.MemoryStorage()
 
 bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot, storage=storage)
@@ -35,13 +39,9 @@ def get_webapp():
         return bot.set_webhook(f"https://{os.getenv('BOT_DOMAIN')}{DEFAULT_WEB_PATH}")
 
     app = get_new_configured_app(dp)
-    app.add_routes([web.get('/post', post_teacher)])  # todo maybe posting signal here
-
     app.on_startup.append(set_webhook)
+    if opros_state() == 'posting':
+        app.on_startup.append(lambda _: posting.start_posting)
     # app.on_shutdown.append(on_shutdown)
 
     return app
-
-
-async def post_teacher(request):
-    await posting.make_new_post()

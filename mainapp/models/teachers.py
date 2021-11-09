@@ -83,9 +83,9 @@ class Teacher(models.Model):
     def get_faculties(self):
         return Faculty.objects.filter(group__teacher=self)
 
-    def get_comments(self):
+    def get_comments(self, faculty):
         from mainapp.models import Result
-        return Result.objects.filter(is_active=True, teacher_n_group__teacher=self,
+        return Result.objects.filter(is_active=True, teacher_n_group__teacher=self, teacher_n_group__group__faculty_id=faculty,
                                      open_answer_moderate=True).values_list('open_question_answer')
 
     def create_slug(self):

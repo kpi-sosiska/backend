@@ -1,4 +1,6 @@
 import asyncio
+import re
+from functools import reduce
 from hashlib import md5
 
 from aiogram import types
@@ -48,7 +50,7 @@ async def try_send(func, *args, **kwargs):
 
 def opros_state():
     state = L['opros_state']
-    return '0' if state not in ('1', '2', '3') else state
+    return '0' if state not in ('1', '2', '3', 'posting') else state
 
 
 async def send_other_teachers_in_group(message: types.Message, group: Group):
@@ -140,3 +142,9 @@ def case_by_num(num: int, c_1: str, c_2: str, c_3: str) -> str:
     if 2 <= num % 10 <= 4:
         return c_2
     return c_3
+
+
+def censure(text):
+    bad_words = L['bad_words'].split(' ')
+    return reduce(lambda res, bad_word: re.sub(bad_word, '*' * len(bad_word), res, flags=re.IGNORECASE),
+                  bad_words, text)
