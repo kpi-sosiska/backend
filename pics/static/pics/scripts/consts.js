@@ -39,8 +39,8 @@ export const captions = {
 }
 
 export const radialQuestions = {  // questions order important!
-    eng: ['cheating', 'comfort', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
-    lector: ['comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
+    eng: ['meaningfulness', 'cheating', 'comfort', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
+    lector: ['grading_system', 'meaningfulness', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'grading_system'],
     practic: ['comfort', 'find_out_rating', 'politeness', 'punctuality', 'relevance', 'grading_system', 'skills'],
     lector_practic: ['grading_system', 'meaningfulness', 'skills', 'cheating_l', 'comfort', 'conformity', 'find_out_rating', 'politeness', 'punctuality', 'questions_available', 'relevance', 'sufficiency', 'cheating_p'],
 }

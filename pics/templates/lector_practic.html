@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
 
-
 {% block style %}
   }
   .right-info {
   padding: 0 0 0 30px;
   }
 
+  .radial {
+    height: 750px;
+    margin-top: 50px;
+  }
+
   .helper-div {
   height: 300px;
   }
 {% endblock %}
-
 
 {% block graphs1 %}
   <div class="percent-mark-container">
@@ -26,7 +29,7 @@
   {% block graphs3 %}
     <div class="percent-mark-container">
       <p class="mark-percent" id="mark-cheating"></p>
-      <p class="mark-description">Викладач не ставить бали <br /> без знань</p>
+      <p class="mark-description">опитаних вважають, що викладач не ставить бали без знань</p>
     </div>
   {% endblock %}
 

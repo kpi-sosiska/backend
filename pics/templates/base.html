@@ -5,14 +5,13 @@
   <div class="teacher-face-and-name">
     <div class="img-container">
       <img class="background-teacher-face" src="{% static 'pics/cat.jpg' %}" alt="#" />
-      <img class="teacher-face" src="{{ teacher_photo }}" alt="teacher's face">
+      <img class="teacher-face" src="{{ teacher_photo }}" alt="teacher's face" onerror="this.style.display='none'">
     </div>
     <h1 class="teacher-name">{{ teacher_name }}</h1>
     <h1 class="teacher-type">{{ teacher_type_text }}</h1>
   </div>
 
   <div class="general-numbers">
-
 
       {% block graphs1 %}
         <div class="percent-mark-container">
@@ -21,29 +20,15 @@
         </div>
       {% endblock %}
 
-
-
       {% block graphs2 %}
-        <div>
-          <p class="mark" id="mark-meaningfulness"></p>
-          <p class="mark-description">Змістовність лекцій</p>
-        </div>
-        <div>
-          <p class="mark" id="mark-grading_system"></p>
-          <p class="mark-description">Система оцінювання</p>
-        </div>
       {% endblock %}
 
 
     {% block graphs3 %}
       <div class="percent-mark-container">
         <p class="mark-percent" id="mark-cheating"></p>
-        <p class="mark-description">Викладач не ставить бали без знань</p>
+        <p class="mark-description">опитаних вважають, що викладач не ставить бали без знань</p>
       </div>
-<!--      <div>-->
-<!--        <p class="mark" id="mark-skills"></p>-->
-<!--        <p class="mark-description">Володіння матеріалом</p>-->
-<!--      </div>-->
     {% endblock %}
 
     <div class="respondents">

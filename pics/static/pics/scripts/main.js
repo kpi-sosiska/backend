@@ -24,15 +24,9 @@ function main() {
         leftMark('mark-grading_system', answers['grading_system'])
         leftMark('mark-meaningfulness', answers['meaningfulness'])
     }
-
     barChart('self-rating', answers['self_rating'], type)
     barChart('education-quality', answers['quality'], type)
-
-//    leftMark('mark-skills', answers['skills'])
-
-
     radialDiagram('radial-diagram', answers, type);
-
     setResponses(teacherData.responses);
     setFormColor();
 }
