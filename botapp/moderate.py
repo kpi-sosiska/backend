@@ -5,7 +5,6 @@ from aiogram import types
 from aiogram.dispatcher.handler import SkipHandler
 from aiogram.utils import exceptions
 from aiogram.utils.callback_data import CallbackData
-from aiogram.utils.markdown import italic
 
 from mainapp.models import Locale as L, Result
 from .bot import dp, bot
@@ -37,7 +36,7 @@ async def moderate_handler(query: types.CallbackQuery, callback_data: dict):
                                                  reply_markup=start_kb)
         return await query.answer()
 
-    await query.message.edit_text(f"{censure(comment.open_question_answer)}\n\n{italic(f'Осталось {comments_count} необработанных комментариев.')}", reply_markup=_keyboard(comment.id))
+    await query.message.edit_text(f"{censure(comment.open_question_answer)}\n\n<i>Осталось {comments_count} необработанных комментариев</i>", reply_markup=_keyboard(comment.id))
 
 
 def _get_comment():
