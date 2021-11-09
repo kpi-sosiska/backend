@@ -128,11 +128,10 @@ class TeacherFacultyResult(models.Model):
         return self.faculty.poll_result_link.removeprefix('@') + str(self.message_id)
 
     def answers(self):
-        def format_answers(a_):
+        def format_answers(qn, a_):
             c_ = Counter(a_)
-            if len(c_) == 2:
-                return c_[0], c_[4]
-            return [c_[i] for i in range(5)]
+            r = 2 if qn.startswith('want_to_continue') else 5
+            return [c_[i] for i in range(r)]
 
         results = self.results()
         c = Counter([r.teacher_type for r in results])
@@ -144,7 +143,7 @@ class TeacherFacultyResult(models.Model):
                 for qn, answ in a.get_answers().items():
                     answers[qn].append(answ)
 
-        answers_c = {qn: format_answers(a) for qn, a in answers.items()}
+        answers_c = {qn: format_answers(qn, a) for qn, a in answers.items()}
         return responses, answers_c
 
     def results(self):
