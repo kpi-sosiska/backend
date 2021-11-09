@@ -95,7 +95,7 @@ async def _get_img(teacher_id, faculty_id):
     return img
 
 
-@dp.message_handler(lambda m: m.chat.id != L['admin_chat_id'], commands=['check'], state='*')
+@dp.message_handler(lambda m: str(m.chat.id) == L['admin_chat_id'], commands=['check'], state='*')
 async def check_bot_in_chats(message: types.Message):
     async def check_faculty(channel):
         try:
