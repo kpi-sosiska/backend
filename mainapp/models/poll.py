@@ -139,7 +139,7 @@ class TeacherFacultyResult(models.Model):
                     answers[qn].append(answ)
 
         answers_c = {qn: Counter(a) for qn, a in answers.items()}
-        answers_c = {qn: [c[i] for i in range(1, 6)] for qn, c in answers_c.items()}
+        answers_c = {qn: [c[i] for i in range(5)] for qn, c in answers_c.items()}
 
         return responses, answers_c
 
