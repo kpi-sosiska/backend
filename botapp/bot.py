@@ -1,3 +1,4 @@
+import asyncio
 import os
 from functools import partial
 
@@ -38,10 +39,12 @@ def get_webapp():
     def set_webhook(_):
         return bot.set_webhook(f"https://{os.getenv('BOT_DOMAIN')}{DEFAULT_WEB_PATH}")
 
+    async def polling(_):
+        asyncio.ensure_future(posting.start_posting())
+
     app = get_new_configured_app(dp)
     app.on_startup.append(set_webhook)
     if opros_state() == 'posting':
-        app.on_startup.append(lambda _: posting.start_posting())
-    # app.on_shutdown.append(on_shutdown)
+        app.on_startup.append(polling)
 
     return app

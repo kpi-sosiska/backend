@@ -31,12 +31,10 @@ TEACHER_TYPE = {
 
 
 async def start_posting():
-    return
     print("POSTING ON")
     # todo optimize
     # faculties = Faculty.objects.all().values_list('id')
     faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
-    print(faculties)
     while True:
         # if not 12 <= datetime.now().hour <= 18:
         #     await asyncio.sleep(60 * 60)  # 1 hour
@@ -45,7 +43,6 @@ async def start_posting():
         tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
                 for faculty in faculties]
         tfrs = filter(None, tfrs)  # remove empty
-        print(tfrs)
         if not tfrs:  # no more prepods to post
             return
 
@@ -61,8 +58,8 @@ async def start_posting():
 
 
 async def _post(tfr):
-    cathedras = ' '.join([f"#{cathedra}" for cathedra in tfr.teacher.cathedras.split('\n')])
-    lessons = '\n'.join([f"{mark} {lesson};" for lesson, mark
+    cathedras = ' '.join([f"#{cathedra}" for cathedra in tfr.teacher.cathedras.split('\n') if cathedra])
+    lessons = '\n'.join([f"{mark} {lesson}" for lesson, mark
                          in zip(tfr.teacher.lessons.split('\n'), cycle(('🔹', '🔸')))])
 
     teacher_type = TEACHER_TYPE[tfr.teacher_type]
@@ -70,7 +67,7 @@ async def _post(tfr):
     if tfr.teacher.univer == 1:  # kpi
         teacher_name = hlink(tfr.teacher.name, 'http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?v=' + tfr.teacher.id)
 
-    text = f"{hide_link(tfr.teacher.id)}" \
+    text = f"{hide_link('http://teacher.com/' + tfr.teacher.id)}" \
            f"{cathedras} {teacher_type} {teacher_name}" \
            f"\n\n{lessons}"
 
@@ -82,13 +79,17 @@ async def _post(tfr):
 async def new_post_handler(message: types.Message):
     if not message.caption_entities or not message.sender_chat:
         return
-
     teacher_id = message.caption_entities[0].url
+    if not teacher_id or not teacher_id.startswith('http://teacher.com/'):
+        return
+    teacher_id = teacher_id.replace('http://teacher.com/', '')
+
     tfr = TeacherFacultyResult.objects.filter(teacher_id=teacher_id,
                                               faculty__poll_result_link=f'@{message.sender_chat.username}').first()
     if not tfr:
         print(f"new_post_handler tfr not found for {teacher_id=} {message.sender_chat.username=}")
         return
+    print(f"prepod {teacher_id=} {message.sender_chat.username=} posted")
 
     tfr.message_id = message.forward_from_message_id
     tfr.save()
@@ -143,7 +144,6 @@ async def check_bot_in_chats(message: types.Message):
 
 if __name__ == '__main__':
     async def test():
-        tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link='@svintestchann').first()
-        await _post(tfr)
+        asyncio.ensure_future(start_posting())
 
     executor.start_polling(dp, on_startup=[lambda _: test()])
