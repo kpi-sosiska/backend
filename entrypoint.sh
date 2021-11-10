@@ -2,7 +2,7 @@
 
 if [[ -v BOT_TOKEN ]]; then
     if [[ -v BOT_DOMAIN ]]; then
-        gunicorn --workers 1 --timeout 60 --bind unix:/run/telegram_bot.sock botapp:gunicorn --worker-class aiohttp.GunicornWebWorker --capture-output
+        gunicorn --workers 1 --timeout 120 --bind unix:/run/telegram_bot.sock botapp:gunicorn --worker-class aiohttp.GunicornWebWorker --capture-output
     else
         python manage.py bot
     fi
