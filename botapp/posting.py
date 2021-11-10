@@ -97,7 +97,7 @@ async def new_post_handler(message: types.Message):
 
 
 async def _get_img(teacher_id, faculty_id):
-    browser = await launch()
+    browser = await launch({'args': ['--no-sandbox']})
     page = await browser.newPage()
     await page.setViewport(dict(width=1500, height=1500))
     await page.goto(f'https://sova.kpi.in.ua/pic/{teacher_id}/{faculty_id}')
