@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime
 
 import django
 
@@ -30,9 +31,15 @@ TEACHER_TYPE = {
 
 
 async def start_posting():
+    # todo optimize
+    # faculties = Faculty.objects.all().values_list('id')
+    faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
+
     while True:
-        # todo optimize
-        faculties = Faculty.objects.all().values_list('id')
+        if not 12 <= datetime.now().hour <= 18:
+            await asyncio.sleep(60 * 60)  # 1 hour
+            continue
+
         tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
                 for faculty in faculties]
         tfrs = filter(None, tfrs)  # remove empty
@@ -41,7 +48,10 @@ async def start_posting():
 
         for tfr in tfrs:
             logging.info(f"post {tfr.teacher.name} {tfr.faculty.name}")
-            await _post(tfr)
+            try:
+                await _post(tfr)
+            except:
+                logging.exception("posting")
             await asyncio.sleep(5)
 
         await asyncio.sleep(60 * 60)  # 1 hour
