@@ -37,9 +37,9 @@ async def start_posting():
     faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
 
     while True:
-        # if not 12 <= datetime.now().hour <= 18:
-        #     await asyncio.sleep(60 * 60)  # 1 hour
-        #     continue
+        if not 12 <= datetime.now().hour <= 18:
+            await asyncio.sleep(60 * 60)  # 1 hour
+            continue
 
         tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
                 for faculty in faculties]
