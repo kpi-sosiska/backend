@@ -35,20 +35,21 @@ async def start_posting():
     # todo optimize
     # faculties = Faculty.objects.all().values_list('id')
     faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
-
+    print(faculties)
     while True:
-        if not 12 <= datetime.now().hour <= 18:
-            await asyncio.sleep(60 * 60)  # 1 hour
-            continue
+        # if not 12 <= datetime.now().hour <= 18:
+        #     await asyncio.sleep(60 * 60)  # 1 hour
+        #     continue
 
         tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
                 for faculty in faculties]
         tfrs = filter(None, tfrs)  # remove empty
+        print(tfrs)
         if not tfrs:  # no more prepods to post
             return
 
         for tfr in tfrs:
-            logging.info(f"post {tfr.teacher.name} {tfr.faculty.name}")
+            print(f"post {tfr.teacher.name} {tfr.faculty.name}")
             try:
                 await _post(tfr)
             except:
@@ -85,7 +86,7 @@ async def new_post_handler(message: types.Message):
     tfr = TeacherFacultyResult.objects.filter(teacher_id=teacher_id,
                                               faculty__poll_result_link=f'@{message.sender_chat.username}').first()
     if not tfr:
-        logging.info(f"new_post_handler tfr not found for {teacher_id=} {message.sender_chat.username=}")
+        print(f"new_post_handler tfr not found for {teacher_id=} {message.sender_chat.username=}")
         return
 
     tfr.message_id = message.forward_from_message_id
