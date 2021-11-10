@@ -31,6 +31,7 @@ TEACHER_TYPE = {
 
 
 async def start_posting():
+    return
     print("POSTING ON")
     # todo optimize
     # faculties = Faculty.objects.all().values_list('id')
