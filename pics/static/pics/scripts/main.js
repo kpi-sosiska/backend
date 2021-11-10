@@ -149,7 +149,7 @@ function getAvg(answers) {
 
 function mergeAnswers(a1, a2) {
     console.assert(a1.length === a2.length);
-    return a1.copy().map((v, i) => v + a2[i]);
+    return a1.slice().map((v, i) => v + a2[i]);
 }
 
 
