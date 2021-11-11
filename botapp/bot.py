@@ -23,7 +23,7 @@ dp.bind_filter(DeepLinkFilter)
 
 # register handlers
 from . import moderate, posting
-if opros_state() != '0':
+if opros_state() not in ('0', 'posting'):
     from . import poll, other_cmds
 
 

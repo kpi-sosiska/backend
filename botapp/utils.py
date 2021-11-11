@@ -148,4 +148,4 @@ def case_by_num(num: int, c_1: str, c_2: str, c_3: str) -> str:
 def censure(text):
     bad_words = L['bad_words'].split(' ')
     t = reduce(lambda res, bad_word: re.sub(bad_word, '*' * len(bad_word), res, flags=re.IGNORECASE), bad_words, text)
-    return escape(t, False)
+    return escape(t, False).capitalize()
