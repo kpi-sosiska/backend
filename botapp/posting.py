@@ -33,15 +33,17 @@ TEACHER_TYPE = {
 async def start_posting():
     print("POSTING ON")
     # todo optimize
-    # faculties = Faculty.objects.all().values_list('id')
-    faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
+    faculties = Faculty.objects.all().values_list('id')
+    # faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
     while True:
-        # if not 12 <= datetime.now().hour <= 18:
-        #     await asyncio.sleep(60 * 60)  # 1 hour
-        #     continue
+        if not 12 <= datetime.now().hour <= 18:
+            print('skip posting')
+            await asyncio.sleep(60 * 60)  # 1 hour
+            continue
 
         tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
                 for faculty in faculties]
+        print(tfrs)
         tfrs = filter(None, tfrs)  # remove empty
         if not tfrs:  # no more prepods to post
             return
