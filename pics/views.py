@@ -2,7 +2,7 @@ import json
 
 from django.shortcuts import render
 
-from mainapp.models import TEACHER_TYPE, TeacherFacultyResult
+from mainapp.models import TeacherFacultyResult
 
 
 def mock(request, t):
@@ -19,6 +19,13 @@ def mock(request, t):
 
     return render(request, t + '.html', context)
 
+
+TEACHER_TYPE = {
+    'LECTOR': 'Лектор',
+    'PRACTIC': 'Практик',
+    'LECTOR_PRACTIC': 'Лектор і практик',
+    'ENG': 'Англійська',
+}
 
 def main(request, teacher, faculty):
     res = TeacherFacultyResult.objects.get(teacher_id=teacher, faculty_id=faculty)
