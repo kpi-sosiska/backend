@@ -60,6 +60,11 @@ async def start_posting():
 
 
 async def _post(tfr):
+    if not tfr.teacher.cathedras:
+        tfr.teacher.cathedras = ''
+    if not tfr.teacher.lessons or not tfr.teacher.lessons.strip():
+        tfr.teacher.lessons = ''
+
     cathedras = ' '.join([f"#{cathedra}" for cathedra in tfr.teacher.cathedras.split('\n') if cathedra])
     lessons = '\n'.join([f"{mark} {lesson}" for lesson, mark
                          in zip(tfr.teacher.lessons.split('\n'), cycle(('🔹', '🔸')))])
@@ -74,27 +79,22 @@ async def _post(tfr):
            f"\n\n{lessons}"
 
     img = await _get_img(tfr.teacher_id, tfr.faculty_id)
-    await bot.send_photo(tfr.faculty.poll_result_link, img, caption=text)
+    message = await bot.send_photo(tfr.faculty.poll_result_link, img, caption=text, disable_notification=True)
+    tfr.message_id = message.message_id
+    tfr.save()
 
 
 @dp.message_handler(content_types=types.ContentTypes.PHOTO)
 async def new_post_handler(message: types.Message):
     if not message.caption_entities or not message.sender_chat:
         return
-    teacher_id = message.caption_entities[0].url
-    if not teacher_id or not teacher_id.startswith('http://teacher.com/'):
-        return
-    teacher_id = teacher_id.replace('http://teacher.com/', '')
 
-    tfr = TeacherFacultyResult.objects.filter(teacher_id=teacher_id,
-                                              faculty__poll_result_link=f'@{message.sender_chat.username}').first()
+    tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{message.sender_chat.username}',
+                                              message_id=message.forward_from_message_id).first()
     if not tfr:
-        print(f"new_post_handler tfr not found for {teacher_id=} {message.sender_chat.username=}")
+        print(f"new_post_handler tfr not found for {message.forward_from_message_id=} {message.sender_chat.username=}")
         return
-    print(f"prepod {teacher_id=} {message.sender_chat.username=} posted")
-
-    tfr.message_id = message.forward_from_message_id
-    tfr.save()
+    print(f"prepod {message.forward_from_message_id=} {message.sender_chat.username=} posted")
 
     for comment in tfr.teacher.get_comments(tfr.faculty_id):
         await message.reply(censure(comment[0]))
