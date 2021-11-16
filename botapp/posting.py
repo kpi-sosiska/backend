@@ -1,3 +1,4 @@
+import io
 import logging
 import os
 from contextlib import suppress
@@ -60,7 +61,7 @@ async def start_posting():
         await asyncio.sleep(30 * 60)  # 30 min
 
 
-async def _post(tfr):
+async def _get_photo_and_text(tfr):
     if not tfr.teacher.cathedras:
         tfr.teacher.cathedras = ''
     if not tfr.teacher.lessons or not tfr.teacher.lessons.strip():
@@ -78,8 +79,12 @@ async def _post(tfr):
     text = f"{hide_link('http://teacher.com/' + tfr.teacher.id)}" \
            f"{cathedras} {teacher_type} {teacher_name}" \
            f"\n\n{lessons}"
-
     img = await _get_img(tfr.teacher_id, tfr.faculty_id)
+    return img, text
+
+
+async def _post(tfr):
+    img, text = await _get_photo_and_text(tfr)
     message = await bot.send_photo(tfr.faculty.poll_result_link, img, caption=text, disable_notification=True)
     tfr.message_id = message.message_id
     tfr.save()
@@ -108,26 +113,21 @@ async def update_photo_handler(message: types.Message):
     with suppress(Exception):
         await message.delete()
 
-    img = await _get_img(tfr.teacher_id, tfr.faculty_id)
-    await message.reply_to_message.edit_media(types.InputMediaPhoto(img))
+    img, text = await _get_photo_and_text(tfr)
+    await bot.edit_message_media(types.InputMediaPhoto(io.BytesIO(img), caption=text, parse_mode='HTML'),
+                                 tfr.faculty.poll_result_link, tfr.message_id)
 
 
 async def _get_tfr(message: types.Message):
     channel_post = message.reply_to_message
     if not channel_post:
-        print('no reply')
         return
 
-    if not (await channel_post.chat.get_member(message.from_user.id)).is_chat_admin():
-        print('no admin')
+    if not (await channel_post.forward_from_chat.get_member(message.from_user.id)).is_chat_admin():
         return
 
-    tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.chat.username}',
-                                               message_id=channel_post.message_id).first()
-    if not tfr:
-        print(f'no tfr {channel_post.chat.username} {channel_post.message_id}')
-
-    return tfr
+    return TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.forward_from_chat.username}',
+                                               message_id=channel_post.forward_from_message_id).first()
 
 
 @dp.message_handler(lambda m: m.forward_from_message_id, content_types=types.ContentTypes.PHOTO)
