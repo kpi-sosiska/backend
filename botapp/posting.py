@@ -69,7 +69,7 @@ async def _get_photo_and_text(tfr):
 
     cathedras = ' '.join([f"#{cathedra}" for cathedra in tfr.teacher.cathedras.split('\n') if cathedra])
     lessons = '\n'.join([f"{mark} {lesson}" for lesson, mark
-                         in zip(tfr.teacher.lessons.split('\n'), cycle(('🔹', '🔸')))])
+                         in zip(tfr.teacher.lessons.split('\n'), cycle(('🔹', '🔸'))) if lesson])
 
     teacher_type = TEACHER_TYPE[tfr.teacher_type]
     teacher_name = tfr.teacher.name
