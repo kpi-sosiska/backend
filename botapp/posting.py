@@ -96,12 +96,13 @@ async def post_comments_handler(message: types.Message):
     if not tfr:
         return
 
-    with suppress(Exception):
-        await message.delete()
-
     comments = tfr.teacher.get_comments(tfr.faculty_id)
     if not comments:
         return await message.reply("Комментов нема")
+
+    with suppress(Exception):
+        await message.delete()
+
     for comment in comments:
         await message.reply_to_message.reply(censure(comment[0]))
         await asyncio.sleep(1.5)
