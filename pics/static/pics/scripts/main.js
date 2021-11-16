@@ -34,7 +34,11 @@ function leftMark(id, value) {
     const el = document.getElementById(id);
     if (el === null) return
 
-    value = getAvg(value) / value.length;
+    if (value.length === 2)
+        value = value[1] / (value[0] + value[1])
+    else if (value.length === 5)
+        value = getAvg(value) / 5;
+    else throw "wrong answers array length"
 
     el.style.color = `hsl(${value ** 2 * 120}deg, 100%, 45%)`
     el.innerHTML = Math.round(value * 100).toString();
