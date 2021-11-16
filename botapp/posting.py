@@ -126,7 +126,7 @@ async def _get_tfr(message: types.Message):
     if not channel_post:
         return
 
-    if not (await channel_post.forward_from_chat.get_member(message.from_user.id)).is_chat_admin():
+    if not (message.from_user.username == 'GroupAnonymousBot' or (await channel_post.forward_from_chat.get_member(message.from_user.id)).is_chat_admin()):
         print(message.from_user.first_name, "not admin of", channel_post.forward_from_chat.first_name)
         return
 
