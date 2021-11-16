@@ -44,7 +44,7 @@ def get_webapp():
 
     app = get_new_configured_app(dp)
     app.on_startup.append(set_webhook)
-    if opros_state() == 'posting':
+    if opros_state() == 'posting' and not os.getenv('NO_POSTING'):
         app.on_startup.append(polling)
 
     return app
