@@ -115,13 +115,19 @@ async def update_photo_handler(message: types.Message):
 async def _get_tfr(message: types.Message):
     channel_post = message.reply_to_message
     if not channel_post:
+        print('no reply')
         return
 
     if not (await channel_post.chat.get_member(message.from_user.id)).is_chat_admin():
+        print('no admin')
         return
 
-    return TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.chat.username}',
+    tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.chat.username}',
                                                message_id=channel_post.message_id).first()
+    if not tfr:
+        print(f'no tfr {channel_post.chat.username} {channel_post.message_id}')
+
+    return tfr
 
 
 @dp.message_handler(lambda m: m.forward_from_message_id, content_types=types.ContentTypes.PHOTO)
