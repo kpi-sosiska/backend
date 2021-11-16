@@ -36,9 +36,9 @@ async def start_posting():
     faculties = Faculty.objects.all().values_list('id')
     # faculties = Faculty.objects.filter(name='ФІОТ').values_list('id')
     while True:
-        if not 12 <= datetime.now().hour <= 18:
+        if not 11 <= datetime.now().hour <= 19:
             print('skip posting')
-            await asyncio.sleep(60 * 60)  # 1 hour
+            await asyncio.sleep(30 * 60)  # 30 min
             continue
 
         tfrs = [TeacherFacultyResult.objects.filter(faculty_id=faculty, message_id__isnull=True).first()
@@ -56,7 +56,7 @@ async def start_posting():
                 logging.exception("posting")
             await asyncio.sleep(5)
 
-        await asyncio.sleep(60 * 60)  # 1 hour
+        await asyncio.sleep(30 * 60)  # 30 min
 
 
 async def _post(tfr):
