@@ -87,7 +87,7 @@ async def _post(tfr):
 
 @dp.message_handler(commands=['post_comments'])
 async def post_comments_handler(message: types.Message):
-    tfr = _get_tfr(message)
+    tfr = await _get_tfr(message)
     if not tfr:
         return
 
@@ -101,7 +101,7 @@ async def post_comments_handler(message: types.Message):
 
 @dp.message_handler(commands=['update_photo'])
 async def update_photo_handler(message: types.Message):
-    tfr = _get_tfr(message)
+    tfr = await _get_tfr(message)
     if not tfr:
         return
 
@@ -112,7 +112,7 @@ async def update_photo_handler(message: types.Message):
     await message.reply_to_message.edit_media(types.InputMediaPhoto(img))
 
 
-def _get_tfr(message: types.Message):
+async def _get_tfr(message: types.Message):
     channel_post = message.reply_to_message
     if not channel_post:
         return
