@@ -127,10 +127,14 @@ async def _get_tfr(message: types.Message):
         return
 
     if not (await channel_post.forward_from_chat.get_member(message.from_user.id)).is_chat_admin():
+        print(message.from_user.first_name, "not admin of", channel_post.forward_from_chat.first_name)
         return
 
-    return TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.forward_from_chat.username}',
-                                               message_id=channel_post.forward_from_message_id).first()
+    tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.forward_from_chat.username}',
+                                              message_id=channel_post.forward_from_message_id).first()
+    if not tfr:
+        await message.reply("я ничо не знаю об этом посте, удалите его")
+    return tfr
 
 
 @dp.message_handler(lambda m: m.forward_from_message_id, content_types=types.ContentTypes.PHOTO)
