@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import suppress
 from datetime import datetime
 
 import django
@@ -84,11 +85,47 @@ async def _post(tfr):
     tfr.save()
 
 
-@dp.message_handler(content_types=types.ContentTypes.PHOTO)
-async def new_post_handler(message: types.Message):
-    if not message.caption_entities or not message.sender_chat:
+@dp.message_handler(commands=['post_comments'])
+async def post_comments_handler(message: types.Message):
+    tfr = _get_tfr(message)
+    if not tfr:
         return
 
+    with suppress(Exception):
+        await message.delete()
+
+    for comment in tfr.teacher.get_comments(tfr.faculty_id):
+        await message.reply_to_message.reply(censure(comment[0]))
+        await asyncio.sleep(1.5)
+
+
+@dp.message_handler(commands=['update_photo'])
+async def update_photo_handler(message: types.Message):
+    tfr = _get_tfr(message)
+    if not tfr:
+        return
+
+    with suppress(Exception):
+        await message.delete()
+
+    img = await _get_img(tfr.teacher_id, tfr.faculty_id)
+    await message.reply_to_message.edit_media(types.InputMediaPhoto(img))
+
+
+def _get_tfr(message: types.Message):
+    channel_post = message.reply_to_message
+    if not channel_post:
+        return
+
+    if not (await channel_post.chat.get_member(message.from_user.id)).is_chat_admin():
+        return
+
+    return TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{channel_post.chat.username}',
+                                               message_id=channel_post.message_id).first()
+
+
+@dp.message_handler(lambda m: m.forward_from_message_id, content_types=types.ContentTypes.PHOTO)
+async def new_post_handler(message: types.Message):
     tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{message.sender_chat.username}',
                                               message_id=message.forward_from_message_id).first()
     if not tfr:
@@ -147,5 +184,6 @@ async def check_bot_in_chats(message: types.Message):
 if __name__ == '__main__':
     async def test():
         asyncio.ensure_future(start_posting())
+
 
     executor.start_polling(dp, on_startup=[lambda _: test()])
