@@ -87,11 +87,11 @@ class ResultAnswers(models.Model):
     answer_1 = models.PositiveSmallIntegerField('Ответ')
     answer_2 = models.PositiveSmallIntegerField('Еще ответ', null=True, blank=True)
 
-    def get_answers(self):
+    def get_answers(self, teacher_type):
         gen = self.question.name
         lec, prac = gen + '_l', gen + '_p'
 
-        if self.question.is_two_answers and self.result.teacher_type == 'LECTOR_PRACTIC':
+        if self.question.is_two_answers and teacher_type == 'LECTOR_PRACTIC':
             return {lec: self.answer_1, prac: self.answer_2}
         return {gen: self.answer_1}
 
@@ -140,7 +140,7 @@ class TeacherFacultyResult(models.Model):
         answers: Dict[str, List[int]] = defaultdict(list)
         for r in results:
             for a in r.answers.all():
-                for qn, answ in a.get_answers().items():
+                for qn, answ in a.get_answers(self.teacher_type).items():
                     answers[qn].append(answ)
 
         answers_c = {qn: format_answers(qn, a) for qn, a in answers.items()}
