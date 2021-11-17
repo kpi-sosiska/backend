@@ -125,7 +125,7 @@ async def update_photo_handler(message: types.Message):
 
 async def _get_tfr(message: types.Message):
     channel_post = message.reply_to_message
-    if not channel_post or not message.forward_from_chat:
+    if not channel_post or not channel_post.forward_from_chat:
         return
 
     if not (message.from_user.username == 'GroupAnonymousBot' or (await channel_post.forward_from_chat.get_member(message.from_user.id)).is_chat_admin()):
