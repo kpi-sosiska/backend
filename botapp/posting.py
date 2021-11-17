@@ -118,13 +118,14 @@ async def update_photo_handler(message: types.Message):
         await message.delete()
 
     img, text = await _get_photo_and_text(tfr)
-    await bot.edit_message_media(types.InputMediaPhoto(io.BytesIO(img), caption=text, parse_mode='HTML'),
-                                 tfr.faculty.poll_result_link, tfr.message_id)
+    with suppress(Exception):
+        await bot.edit_message_media(types.InputMediaPhoto(io.BytesIO(img), caption=text, parse_mode='HTML'),
+                                     tfr.faculty.poll_result_link, tfr.message_id)
 
 
 async def _get_tfr(message: types.Message):
     channel_post = message.reply_to_message
-    if not channel_post:
+    if not channel_post or not message.forward_from_chat:
         return
 
     if not (message.from_user.username == 'GroupAnonymousBot' or (await channel_post.forward_from_chat.get_member(message.from_user.id)).is_chat_admin()):
@@ -138,7 +139,7 @@ async def _get_tfr(message: types.Message):
     return tfr
 
 
-@dp.message_handler(lambda m: m.forward_from_message_id, content_types=types.ContentTypes.PHOTO)
+@dp.message_handler(lambda m: m.forward_from_message_id and m.sender_chat, content_types=types.ContentTypes.PHOTO)
 async def new_post_handler(message: types.Message):
     tfr = TeacherFacultyResult.objects.filter(faculty__poll_result_link=f'@{message.sender_chat.username}',
                                               message_id=message.forward_from_message_id).first()
