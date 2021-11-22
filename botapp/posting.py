@@ -90,6 +90,18 @@ async def _post(tfr):
     tfr.save()
 
 
+@dp.message_handler(commands=['anon'])
+async def post_anon_comment(message: types.Message):
+    channel_post = message.reply_to_message
+    if not channel_post or not channel_post.forward_from_chat:
+        return
+
+    with suppress(Exception):
+        await message.delete()
+
+    await channel_post.reply(message.text + '\n\n<i>Анонімний відгук через команду /anon <pre>текст</pre></i>')
+
+
 @dp.message_handler(commands=['post_comments'])
 async def post_comments_handler(message: types.Message):
     tfr = await _get_tfr(message)
