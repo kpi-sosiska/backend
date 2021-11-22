@@ -99,7 +99,9 @@ async def post_anon_comment(message: types.Message):
     with suppress(Exception):
         await message.delete()
 
-    await channel_post.reply(message.text + '\n\n<i>Анонімний відгук через команду /anon <pre>текст</pre></i>')
+    text = message.get_args()
+    if text:
+        await channel_post.reply(text + '\n\n<i>Анонімний відгук через команду /anon <pre>текст</pre></i>')
 
 
 @dp.message_handler(commands=['post_comments'])
