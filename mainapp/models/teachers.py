@@ -69,7 +69,7 @@ class Group(models.Model):
 
 class Teacher(models.Model):
     id = models.CharField(max_length=36, primary_key=True)
-    slug = models.SlugField('slug', unique=True)
+    slug = models.SlugField('slug', unique=True, null=True)
     name = models.CharField('Имя', max_length=200)
     photo = models.CharField('Ссылка на фото', max_length=500, null=True, blank=True)
     is_eng = models.BooleanField('Это англ?', default=False)
