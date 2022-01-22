@@ -59,6 +59,10 @@ class Group(models.Model):
         from botapp.utils import encode_start_group
         return encode_start_group(self.id)
 
+    @property
+    def rozklad_link(self):
+        return "http://rozklad.kpi.ua/Schedules/ViewSchedule.aspx?g=" + self.id
+
     def __str__(self):
         return f"{self.name} ({self.faculty})"
 

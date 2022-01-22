@@ -13,6 +13,7 @@ from mainapp.models import Locale as L, Group
 
 cb_answer = CallbackData("answer", "question", "row", "answer")
 cb_help = CallbackData("help", "question")
+cb_confirm_group = CallbackData("confirm_group", "group_id")
 _lec_btn = types.InlineKeyboardButton(L['2answrs_LECTOR'], callback_data=cb_help.new("2answ"))
 _pra_btn = types.InlineKeyboardButton(L['2answrs_PRACTIC'], callback_data=cb_help.new("2answ"))
 
@@ -36,6 +37,23 @@ def question_keyboard(question, teacher_type, answers=(None, None), hide_help=Fa
 
     if not hide_help and question.answer_tip:
         keyboard.insert(help_btn)
+    return keyboard
+
+
+def confirm_group_keyboard(group: Group):
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard.insert(
+        types.InlineKeyboardButton(
+            L["confirm_search_group"],
+            callback_data=cb_confirm_group.new(group_id=group.id),
+        )
+    )
+    keyboard.insert(
+        types.InlineKeyboardButton(
+            L["btn_search_group_again"],
+            switch_inline_query_current_chat=""
+        )
+    )
     return keyboard
 
 
