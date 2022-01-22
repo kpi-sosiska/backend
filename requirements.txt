@@ -8,3 +8,4 @@ djangorestframework==3.12.4
 django-filter==2.4.0
 transliterate==1.10.2
 aioredis==1.0.0
+django-cors-headers==3.11.0
