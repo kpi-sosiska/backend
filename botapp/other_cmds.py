@@ -14,7 +14,7 @@ class StartStates(StatesGroup):
     choose_group_inline = State()
 
 
-@dp.message_handler(commands=['teachers_left'], state='*')
+@dp.message_handler(commands=['teachers_left'], state='*', chat_type=types.ChatType.PRIVATE)
 async def teachers_left(message: types.Message):
     r = models.Result.objects.filter(is_active=True, user_id=hash_(message.from_user.id)).first()
     if not r:
@@ -48,7 +48,7 @@ async def start_group_user(message: types.Message, payload: str):
     await send_other_teachers_in_group(message, group)
 
 
-@dp.message_handler(commands=['start'], state='*')
+@dp.message_handler(commands=['start'], state='*', chat_type=types.ChatType.PRIVATE)
 async def start(message: types.Message):
     r = models.Result.objects.filter(is_active=True, user_id=hash_(message.from_user.id)).first()
     if r:
